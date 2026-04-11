@@ -59,5 +59,14 @@ for (const testCase of connectorCases) {
     if (testCase.expectedStatus === "not_found") {
       assert.match(result.summary, /not found/i);
     }
+
+    if (Array.isArray(testCase.expectedFormatBuckets)) {
+      assert.ok(Array.isArray(result.formats), `${testCase.id} should include formats`);
+      assert.equal(result.formats.length, testCase.expectedFormatBuckets.length);
+      const buckets = result.formats.map((row) => row.bucket);
+      for (let i = 0; i < buckets.length; i++) {
+        assert.equal(buckets[i], testCase.expectedFormatBuckets[i]);
+      }
+    }
   });
 }

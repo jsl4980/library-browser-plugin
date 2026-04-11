@@ -16,20 +16,54 @@
       <div class="library-browser-card__eyebrow">Library Browser</div>
       <div class="library-browser-card__title">Checking your catalog…</div>
       <div class="library-browser-card__detail">Looking for a title and author match.</div>
+      <ul class="library-browser-card__formats" hidden></ul>
       <a class="library-browser-card__action" href="#" target="_blank" rel="noreferrer noopener">Open library search</a>
     `;
     return card;
   }
 
+  function formatDisplayName(entry) {
+    if (entry.bucket === "physical_book") {
+      return "Print book";
+    }
+    if (entry.bucket === "ebook") {
+      return "E-book";
+    }
+    if (entry.bucket === "audiobook") {
+      return "Audiobook";
+    }
+    return entry.label || "Format";
+  }
+
   function renderResult(card, result) {
     const title = card.querySelector(".library-browser-card__title");
     const detail = card.querySelector(".library-browser-card__detail");
+    const formatsList = card.querySelector(".library-browser-card__formats");
     const action = card.querySelector(".library-browser-card__action");
     const badge = card.querySelector(".library-browser-card__eyebrow");
 
     badge.textContent = result.libraryName ? `${result.libraryName}` : "Library Browser";
     title.textContent = result.summary;
     detail.textContent = result.detail;
+
+    if (Array.isArray(result.formats) && result.formats.length > 0) {
+      formatsList.innerHTML = "";
+      for (const entry of result.formats) {
+        const li = document.createElement("li");
+        li.className = "library-browser-card__format";
+        li.dataset.availability = entry.availability;
+        const count = entry.count;
+        li.textContent =
+          typeof count === "number" && Number.isFinite(count)
+            ? `${formatDisplayName(entry)} (${count})`
+            : `${formatDisplayName(entry)} — ${entry.hint}`;
+        formatsList.appendChild(li);
+      }
+      formatsList.hidden = false;
+    } else {
+      formatsList.innerHTML = "";
+      formatsList.hidden = true;
+    }
 
     if (result.actionUrl) {
       action.href = result.actionUrl;

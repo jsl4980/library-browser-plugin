@@ -34,6 +34,22 @@
   line-height: 1.5;
 }
 
+.library-browser-card__formats {
+  margin: 0 0 10px;
+  padding-left: 1.15em;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #2d3d2a;
+}
+
+.library-browser-card__format[data-availability="available_now"] {
+  color: #0d5e46;
+}
+
+.library-browser-card__format[data-availability="hold_available"] {
+  color: #6b5a2a;
+}
+
 .library-browser-card__action {
   display: inline-block;
   color: #0d5e46;

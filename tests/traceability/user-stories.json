@@ -22,5 +22,9 @@
   "US6": {
     "title": "Safe degradation on bad input or drift",
     "description": "As a user, I want the extension to behave safely when Goodreads/Amazon metadata is incomplete or the library catalog changes unexpectedly."
+  },
+  "US7": {
+    "title": "Per-format catalog availability",
+    "description": "As a user viewing a book on Goodreads or Amazon, I want to see which formats OCPL offers (print book, ebook, audiobook) and each format’s availability so I can choose how to borrow."
   }
 }

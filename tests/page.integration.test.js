@@ -110,3 +110,38 @@ test("TC-US6-INCOMPLETE-METADATA degrades safely with missing author and ISBN", 
   assert.equal(harness.sentMessages[0].book.author, "");
   assert.equal(harness.sentMessages[0].book.isbn13, "");
 });
+
+test("TC-US7-PAGE-RENDER lists per-format availability on the card", async () => {
+  const testCase = pageCases.get("TC-US7-PAGE-RENDER");
+  const harness = createPageHarness({
+    html: loadPageFixture("goodreads-book.html"),
+    url: "https://www.goodreads.com/book/show/1-the-testable-library",
+    runtimeResult: {
+      status: "available_now",
+      summary: "Available now at OCPL",
+      detail: "Print book: Available now E-book: Hold or request Audiobook: Hold or request",
+      actionUrl: "https://catalog.onlib.org/polaris/view.aspx?isbn=9781234567897",
+      libraryName: "Onondaga County Public Library System",
+      formats: [
+        { bucket: "physical_book", label: "Book", availability: "available_now", hint: "Available now" },
+        { bucket: "ebook", label: "E-book", availability: "hold_available", hint: "Hold or request" },
+        { bucket: "audiobook", label: "Audiobook on CD", availability: "hold_available", hint: "Hold or request" }
+      ]
+    }
+  });
+
+  await new Promise((resolve) => setImmediate(resolve));
+  const card = harness.getCard();
+  const formatsList = card.querySelector(".library-browser-card__formats");
+  const items = formatsList.querySelectorAll(".library-browser-card__format");
+
+  assertTraceability({ stories, testCase });
+  assert.ok(card, "Expected a library card to be inserted");
+  assert.equal(card.dataset.status, testCase.expectedStatus);
+  assert.equal(formatsList.hidden, false);
+  assert.equal(items.length, 3);
+  assert.match(items[0].textContent, /Print book/);
+  assert.match(items[0].textContent, /Available now/);
+  assert.match(items[1].textContent, /E-book/);
+  assert.match(items[2].textContent, /Audiobook/);
+});

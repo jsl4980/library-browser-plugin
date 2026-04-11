@@ -55,6 +55,26 @@
       "requiredInPr": true
     },
     {
+      "id": "TC-US7-MULTI-FORMAT",
+      "stories": ["US7", "US4", "US5"],
+      "kind": "connector",
+      "source": "fixture",
+      "fixtureId": "ocpl-multi-format",
+      "expectedStatus": "available_now",
+      "expectedFormatBuckets": ["physical_book", "ebook", "audiobook"],
+      "requiredInPr": true
+    },
+    {
+      "id": "TC-US7-FACET-NARROW",
+      "stories": ["US7", "US4", "US5"],
+      "kind": "connector",
+      "source": "fixture",
+      "fixtureId": "ocpl-narrow-facets",
+      "expectedStatus": "available_now",
+      "expectedFormatBuckets": ["physical_book", "ebook", "audiobook"],
+      "requiredInPr": true
+    },
+    {
       "id": "TC-US1-GOODREADS-RENDER",
       "stories": ["US1", "US4"],
       "kind": "page",
@@ -88,6 +108,15 @@
       "source": "fixture",
       "fixtureId": "goodreads-incomplete-metadata",
       "expectedStatus": "not_found",
+      "requiredInPr": true
+    },
+    {
+      "id": "TC-US7-PAGE-RENDER",
+      "stories": ["US7", "US1", "US4"],
+      "kind": "page",
+      "source": "fixture",
+      "fixtureId": "goodreads-render-formats",
+      "expectedStatus": "available_now",
       "requiredInPr": true
     },
     {

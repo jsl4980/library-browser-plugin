@@ -22,7 +22,7 @@ When browsing a book on Goodreads or Amazon, show whether the user's library app
 
 ## Next implementation priorities
 
-1. Deepen OCPL Polaris parsing to extract exact copy and format availability.
+1. Deepen OCPL Polaris parsing further (copy-level detail, drift hardening); per-format availability (US7) shipped in connector + card.
 2. Harden Goodreads and Amazon page parsing against layout changes.
 3. Add regression fixtures for sample book pages and known OCPL catalog results.
 4. Generalize the connector interface after the OCPL flow is stable.
@@ -34,6 +34,8 @@ When browsing a book on Goodreads or Amazon, show whether the user's library app
 - 2026-04-05: V1 starts with direct library lookup, not Libby account integration.
 - 2026-04-05: V1 should optimize for one real library before broad multi-library support.
 - 2026-04-11: The first real library integration targets the Onondaga County Public Library System Polaris catalog at `https://catalog.onlib.org/polaris/Search/default.aspx`.
+- 2026-04-12: US7 — table-row parsing maps Polaris-style material labels to print / ebook / audiobook buckets with per-format availability hints in the inline card.
+- 2026-04-12: OCPL loads hit lists via AJAX; connector also reads PowerPAC **Type of Material** narrow-search facets and tries later lookup URLs when the ISBN response has no format data. Availability text ignores `<script>` so UI strings like “Place Hold” do not false-trigger holds.
 
 ## Open items
 

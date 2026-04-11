@@ -101,6 +101,40 @@
       "responseFile": "ocpl-unexpected-markup.html",
       "responseStatus": 200,
       "expectedStatus": "not_found"
+    },
+    {
+      "id": "ocpl-multi-format",
+      "captureDate": "2026-04-11",
+      "originatingUrlPattern": "https://catalog.onlib.org/polaris/view.aspx?isbn=*",
+      "stories": ["US7", "US4", "US5"],
+      "book": {
+        "title": "Multi Format Saga",
+        "author": "Alex Author",
+        "isbn13": "9789999999991",
+        "isbn10": "9999999991",
+        "sourceSite": "goodreads",
+        "sourceUrl": "https://www.goodreads.com/book/show/99"
+      },
+      "responseFile": "ocpl-multi-format.html",
+      "responseStatus": 200,
+      "expectedStatus": "available_now"
+    },
+    {
+      "id": "ocpl-narrow-facets",
+      "captureDate": "2026-04-12",
+      "originatingUrlPattern": "https://catalog.onlib.org/polaris/view.aspx?keyword=*",
+      "stories": ["US7", "US4", "US5"],
+      "book": {
+        "title": "Facet Sample Title",
+        "author": "Alex Author",
+        "isbn13": "9788888888880",
+        "isbn10": "",
+        "sourceSite": "amazon",
+        "sourceUrl": "https://www.amazon.com/dp/facettest"
+      },
+      "responseFile": "ocpl-narrow-facets.html",
+      "responseStatus": 200,
+      "expectedStatus": "available_now"
     }
   ]
 }
