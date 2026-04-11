@@ -1,0 +1,26 @@
+{
+  "US1": {
+    "title": "Goodreads inline library availability",
+    "description": "As a Goodreads user viewing a book page, I want to know whether OCPL has the book so I can decide whether to borrow it from the library instead of buying it."
+  },
+  "US2": {
+    "title": "Amazon inline library availability",
+    "description": "As an Amazon user viewing a book page, I want the same library answer inline without leaving the page."
+  },
+  "US3": {
+    "title": "Prefer ISBN over loose matching",
+    "description": "As a user, when the exact ISBN is present, I want the extension to prefer that match over looser title/author matching."
+  },
+  "US4": {
+    "title": "Link to catalog result",
+    "description": "As a user, when a book is in the OCPL catalog, I want a direct link to the relevant catalog result."
+  },
+  "US5": {
+    "title": "Meaningful availability states",
+    "description": "As a user, I want the extension to distinguish available now, hold/request likely needed, not found, and lookup failed."
+  },
+  "US6": {
+    "title": "Safe degradation on bad input or drift",
+    "description": "As a user, I want the extension to behave safely when Goodreads/Amazon metadata is incomplete or the library catalog changes unexpectedly."
+  }
+}

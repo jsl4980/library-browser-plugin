@@ -1,0 +1,130 @@
+{
+  "testCases": [
+    {
+      "id": "TC-US3-ISBN-AVAILABLE",
+      "stories": ["US3", "US4", "US5"],
+      "kind": "connector",
+      "source": "fixture",
+      "fixtureId": "ocpl-isbn-available",
+      "expectedStatus": "available_now",
+      "requiredInPr": true
+    },
+    {
+      "id": "TC-US3-ISBN-HOLD",
+      "stories": ["US3", "US4", "US5"],
+      "kind": "connector",
+      "source": "fixture",
+      "fixtureId": "ocpl-isbn-hold",
+      "expectedStatus": "hold_available",
+      "requiredInPr": true
+    },
+    {
+      "id": "TC-US3-TITLE-AUTHOR-FALLBACK",
+      "stories": ["US3", "US5"],
+      "kind": "connector",
+      "source": "fixture",
+      "fixtureId": "ocpl-title-author-fallback",
+      "expectedStatus": "found",
+      "requiredInPr": true
+    },
+    {
+      "id": "TC-US5-NOT-FOUND",
+      "stories": ["US5"],
+      "kind": "connector",
+      "source": "fixture",
+      "fixtureId": "ocpl-not-found",
+      "expectedStatus": "not_found",
+      "requiredInPr": true
+    },
+    {
+      "id": "TC-US5-LOOKUP-ERROR",
+      "stories": ["US5", "US6"],
+      "kind": "connector",
+      "source": "fixture",
+      "fixtureId": "ocpl-error",
+      "expectedStatus": "error",
+      "requiredInPr": true
+    },
+    {
+      "id": "TC-US6-UNEXPECTED-MARKUP",
+      "stories": ["US5", "US6"],
+      "kind": "connector",
+      "source": "fixture",
+      "fixtureId": "ocpl-unexpected-markup",
+      "expectedStatus": "not_found",
+      "requiredInPr": true
+    },
+    {
+      "id": "TC-US1-GOODREADS-RENDER",
+      "stories": ["US1", "US4"],
+      "kind": "page",
+      "source": "fixture",
+      "fixtureId": "goodreads-render",
+      "expectedStatus": "available_now",
+      "requiredInPr": true
+    },
+    {
+      "id": "TC-US2-AMAZON-RENDER",
+      "stories": ["US2", "US4"],
+      "kind": "page",
+      "source": "fixture",
+      "fixtureId": "amazon-render",
+      "expectedStatus": "hold_available",
+      "requiredInPr": true
+    },
+    {
+      "id": "TC-US4-CTA-LINK",
+      "stories": ["US4"],
+      "kind": "page",
+      "source": "fixture",
+      "fixtureId": "cta-link",
+      "expectedStatus": "found",
+      "requiredInPr": true
+    },
+    {
+      "id": "TC-US6-INCOMPLETE-METADATA",
+      "stories": ["US6"],
+      "kind": "page",
+      "source": "fixture",
+      "fixtureId": "goodreads-incomplete-metadata",
+      "expectedStatus": "not_found",
+      "requiredInPr": true
+    },
+    {
+      "id": "TC-LIVE-US3-ISBN-KNOWN-BOOK",
+      "stories": ["US3", "US4", "US5"],
+      "kind": "connector",
+      "source": "live",
+      "fixtureId": "live-known-isbn",
+      "expectedStatuses": ["available_now", "hold_available", "found"],
+      "requiredInPr": false
+    },
+    {
+      "id": "TC-LIVE-US5-STATUS-KNOWN-BOOK",
+      "stories": ["US5"],
+      "kind": "connector",
+      "source": "live",
+      "fixtureId": "live-known-title",
+      "expectedStatuses": ["available_now", "hold_available", "found", "not_found"],
+      "requiredInPr": false
+    },
+    {
+      "id": "TC-LIVE-US4-ACTION-URL",
+      "stories": ["US4"],
+      "kind": "connector",
+      "source": "live",
+      "fixtureId": "live-action-url",
+      "expectedStatuses": ["available_now", "hold_available", "found", "not_found"],
+      "requiredInPr": false
+    },
+    {
+      "id": "TC-LIVE-US6-DRIFT-DETECTION",
+      "stories": ["US6"],
+      "kind": "connector",
+      "source": "live",
+      "fixtureId": "live-drift-detection",
+      "expectedStatuses": ["available_now", "hold_available", "found", "not_found", "error"],
+      "requiredInPr": false
+    }
+  ]
+}

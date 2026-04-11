@@ -1,0 +1,106 @@
+{
+  "fixtures": [
+    {
+      "id": "ocpl-isbn-available",
+      "captureDate": "2026-04-11",
+      "originatingUrlPattern": "https://catalog.onlib.org/polaris/view.aspx?isbn=*",
+      "stories": ["US3", "US4", "US5"],
+      "book": {
+        "title": "The Testable Library",
+        "author": "Ada Example",
+        "isbn13": "9781234567897",
+        "isbn10": "1234567890",
+        "sourceSite": "goodreads",
+        "sourceUrl": "https://www.goodreads.com/book/show/1"
+      },
+      "responseFile": "ocpl-isbn-available.html",
+      "responseStatus": 200,
+      "expectedStatus": "available_now"
+    },
+    {
+      "id": "ocpl-isbn-hold",
+      "captureDate": "2026-04-11",
+      "originatingUrlPattern": "https://catalog.onlib.org/polaris/view.aspx?isbn=*",
+      "stories": ["US3", "US4", "US5"],
+      "book": {
+        "title": "Waiting for Circulation",
+        "author": "Nina Queue",
+        "isbn13": "9781111111111",
+        "isbn10": "1111111111",
+        "sourceSite": "amazon",
+        "sourceUrl": "https://www.amazon.com/dp/testhold"
+      },
+      "responseFile": "ocpl-isbn-hold.html",
+      "responseStatus": 200,
+      "expectedStatus": "hold_available"
+    },
+    {
+      "id": "ocpl-title-author-fallback",
+      "captureDate": "2026-04-11",
+      "originatingUrlPattern": "https://catalog.onlib.org/polaris/view.aspx?keyword=*",
+      "stories": ["US3", "US5"],
+      "book": {
+        "title": "Fallback Catalog Search",
+        "author": "Taylor Query",
+        "isbn13": "",
+        "isbn10": "",
+        "sourceSite": "goodreads",
+        "sourceUrl": "https://www.goodreads.com/book/show/2"
+      },
+      "responseFile": "ocpl-title-author-fallback.html",
+      "responseStatus": 200,
+      "expectedStatus": "found"
+    },
+    {
+      "id": "ocpl-not-found",
+      "captureDate": "2026-04-11",
+      "originatingUrlPattern": "https://catalog.onlib.org/polaris/view.aspx?keyword=*",
+      "stories": ["US5"],
+      "book": {
+        "title": "No Match Novel",
+        "author": "Absent Author",
+        "isbn13": "9780000000002",
+        "isbn10": "0000000002",
+        "sourceSite": "amazon",
+        "sourceUrl": "https://www.amazon.com/dp/testmissing"
+      },
+      "responseFile": "ocpl-not-found.html",
+      "responseStatus": 200,
+      "expectedStatus": "not_found"
+    },
+    {
+      "id": "ocpl-error",
+      "captureDate": "2026-04-11",
+      "originatingUrlPattern": "https://catalog.onlib.org/polaris/view.aspx?isbn=*",
+      "stories": ["US5", "US6"],
+      "book": {
+        "title": "Server Trouble",
+        "author": "Casey Failure",
+        "isbn13": "9780000000003",
+        "isbn10": "0000000003",
+        "sourceSite": "goodreads",
+        "sourceUrl": "https://www.goodreads.com/book/show/3"
+      },
+      "responseFile": "ocpl-error.html",
+      "responseStatus": 500,
+      "expectedStatus": "error"
+    },
+    {
+      "id": "ocpl-unexpected-markup",
+      "captureDate": "2026-04-11",
+      "originatingUrlPattern": "https://catalog.onlib.org/polaris/view.aspx?keyword=*",
+      "stories": ["US5", "US6"],
+      "book": {
+        "title": "Shifting Markup",
+        "author": "Pat Parser",
+        "isbn13": "9780000000004",
+        "isbn10": "0000000004",
+        "sourceSite": "amazon",
+        "sourceUrl": "https://www.amazon.com/dp/testdrift"
+      },
+      "responseFile": "ocpl-unexpected-markup.html",
+      "responseStatus": 200,
+      "expectedStatus": "not_found"
+    }
+  ]
+}

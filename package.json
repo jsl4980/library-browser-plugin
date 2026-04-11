@@ -1,0 +1,10 @@
+{
+  "name": "library-browser-plugin",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Browser extension scaffold for checking OCPL availability from Goodreads and Amazon.",
+  "scripts": {
+    "test": "node tests/run-tests.js",
+    "test:live": "node tests/run-live-tests.js"
+  }
+}

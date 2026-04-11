@@ -1,0 +1,60 @@
+#library-browser-card.library-browser-card {
+  box-sizing: border-box;
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px solid #c8d6c4;
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at top right, rgba(245, 201, 115, 0.28), transparent 35%),
+    linear-gradient(180deg, #fbfcf7 0%, #f2f5eb 100%);
+  color: #213326;
+  font-family: Georgia, "Times New Roman", serif;
+  box-shadow: 0 10px 24px rgba(45, 66, 43, 0.08);
+}
+
+.library-browser-card__eyebrow {
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #556b4d;
+}
+
+.library-browser-card__title {
+  margin-bottom: 6px;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.library-browser-card__detail {
+  margin-bottom: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.library-browser-card__action {
+  display: inline-block;
+  color: #0d5e46;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.library-browser-card__action:hover {
+  text-decoration: underline;
+}
+
+#library-browser-card[data-status="found"] {
+  border-color: #93b48a;
+}
+
+#library-browser-card[data-status="not_found"] {
+  border-color: #d5b984;
+}
+
+#library-browser-card[data-status="error"],
+#library-browser-card[data-status="needs_setup"] {
+  border-color: #cda5a5;
+}

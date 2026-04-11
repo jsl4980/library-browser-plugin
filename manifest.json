@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "Library Browser Plugin",
+  "version": "0.1.0",
+  "description": "See whether books you find on Goodreads and Amazon appear in your library catalog.",
+  "permissions": [
+    "storage",
+    "permissions"
+  ],
+  "optional_host_permissions": [
+    "https://catalog.onlib.org/*"
+  ],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "options_page": "src/options.html",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.goodreads.com/book/*",
+        "https://www.amazon.com/*"
+      ],
+      "js": [
+        "src/shared/namespace.js",
+        "src/shared/normalize.js",
+        "src/shared/book-metadata.js",
+        "src/site-adapters/goodreads.js",
+        "src/site-adapters/amazon.js",
+        "src/content.js"
+      ],
+      "css": [
+        "src/styles.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}

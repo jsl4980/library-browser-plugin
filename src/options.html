@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Library Browser Settings</title>
+    <style>
+      :root {
+        color-scheme: light;
+      }
+
+      body {
+        margin: 0;
+        font-family: Georgia, "Times New Roman", serif;
+        background:
+          radial-gradient(circle at top, rgba(230, 195, 114, 0.32), transparent 34%),
+          linear-gradient(180deg, #f8f7f1 0%, #eef1e7 100%);
+        color: #223127;
+      }
+
+      main {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 40px 20px 64px;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 36px;
+      }
+
+      p {
+        line-height: 1.5;
+      }
+
+      form {
+        margin-top: 24px;
+        padding: 24px;
+        border: 1px solid #ccd5c4;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.76);
+        box-shadow: 0 12px 28px rgba(33, 49, 39, 0.08);
+      }
+
+      label {
+        display: block;
+        margin-top: 16px;
+        font-weight: 700;
+      }
+
+      input,
+      textarea {
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 8px;
+        padding: 12px 14px;
+        border: 1px solid #b9c6b3;
+        border-radius: 12px;
+        font: inherit;
+        background: #fffdf8;
+      }
+
+      textarea {
+        min-height: 120px;
+        resize: vertical;
+      }
+
+      button {
+        margin-top: 20px;
+        padding: 12px 18px;
+        border: 0;
+        border-radius: 999px;
+        background: #0d5e46;
+        color: white;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      #status {
+        min-height: 24px;
+        margin-top: 16px;
+        font-weight: 700;
+      }
+
+      code {
+        padding: 2px 6px;
+        border-radius: 999px;
+        background: rgba(13, 94, 70, 0.08);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Library Browser Settings</h1>
+      <p>
+        This build is configured for the Onondaga County Public Library System Polaris catalog.
+        You can change the library name or base catalog URL here if the catalog moves or if we
+        add another Polaris-based library later.
+      </p>
+      <form id="settings-form">
+        <label for="libraryName">Library name</label>
+        <input id="libraryName" name="libraryName" placeholder="Onondaga County Public Library System" />
+
+        <label for="catalogBaseUrl">Catalog base URL</label>
+        <textarea
+          id="catalogBaseUrl"
+          name="catalogBaseUrl"
+          placeholder="https://catalog.onlib.org/polaris/"
+        ></textarea>
+
+        <button type="submit">Save settings</button>
+        <div id="status" aria-live="polite"></div>
+      </form>
+    </main>
+
+    <script src="./shared/namespace.js"></script>
+    <script src="./shared/normalize.js"></script>
+    <script src="./options.js"></script>
+  </body>
+  </html>
