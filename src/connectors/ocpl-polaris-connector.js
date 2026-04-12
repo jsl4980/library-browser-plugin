@@ -427,27 +427,73 @@
   const CATALOG_LIVE_DETAIL =
     " Open the catalog for per-format copies and holds (live rows load in the browser).";
 
-  async function lookup(book, settings) {
+  function buildLookupDebug(book, urls, tries, winningUrl, winningIndex) {
+    return {
+      source: {
+        title: book.title || "",
+        author: book.author || "",
+        isbn13: book.isbn13 || "",
+        isbn10: book.isbn10 || "",
+        normalizedTitle: book.normalizedTitle || "",
+        normalizedAuthor: book.normalizedAuthor || "",
+        sourceSite: book.sourceSite || "",
+        sourceUrl: book.sourceUrl || ""
+      },
+      catalog: {
+        lookupUrlsOrdered: urls.slice(),
+        tries: tries.map((t) => ({ ...t })),
+        winningUrl: winningUrl || null,
+        winningIndex: typeof winningIndex === "number" ? winningIndex : null
+      }
+    };
+  }
+
+  function withLookupDebug(result, includeDebug, book, urls, tries, winningUrl, winningIndex) {
+    if (!includeDebug) {
+      return result;
+    }
+    return {
+      ...result,
+      debug: buildLookupDebug(book, urls, tries, winningUrl, winningIndex)
+    };
+  }
+
+  async function lookup(book, settings, lookupOptions) {
+    const includeDebug = Boolean(lookupOptions && lookupOptions.includeDebug);
     const urls = buildLookupUrls(book, settings);
+    const tries = [];
+    let winningUrl = null;
+    let winningIndex = null;
 
     if (!urls.length) {
-      return {
-        status: "error",
-        summary: "Missing book details",
-        detail: "This page did not expose enough book information to search OCPL.",
-        actionUrl: "",
-        libraryName: settings.libraryName
-      };
+      return withLookupDebug(
+        {
+          status: "error",
+          summary: "Missing book details",
+          detail: "This page did not expose enough book information to search OCPL.",
+          actionUrl: "",
+          libraryName: settings.libraryName
+        },
+        includeDebug,
+        book,
+        urls,
+        tries,
+        winningUrl,
+        winningIndex
+      );
     }
 
     let chosen = null;
 
-    for (const url of urls) {
+    for (let i = 0; i < urls.length; i++) {
+      const url = urls[i];
       try {
         const page = await fetchCatalogPage(url);
         const normalizedPageText = normalizeText(page.text);
+        const matched = pageHasMatch(book, normalizedPageText);
+        tries.push({ url, matched });
 
-        if (!pageHasMatch(book, normalizedPageText)) {
+        if (!matched) {
           continue;
         }
 
@@ -458,79 +504,128 @@
 
         if (!chosen) {
           chosen = { page, mergedFormats, facetMode };
+          winningUrl = page.url;
+          winningIndex = i;
         }
 
         if (mergedFormats.length > 0) {
           chosen = { page, mergedFormats, facetMode };
+          winningUrl = page.url;
+          winningIndex = i;
           break;
         }
       } catch (error) {
-        return {
-          status: "error",
-          summary: "Library search failed",
-          detail: error instanceof Error ? error.message : "Unexpected catalog lookup error.",
-          actionUrl: url,
-          libraryName: settings.libraryName
-        };
+        tries.push({
+          url,
+          matched: false,
+          error: error instanceof Error ? error.message : "Unexpected catalog lookup error."
+        });
+        return withLookupDebug(
+          {
+            status: "error",
+            summary: "Library search failed",
+            detail: error instanceof Error ? error.message : "Unexpected catalog lookup error.",
+            actionUrl: url,
+            libraryName: settings.libraryName
+          },
+          includeDebug,
+          book,
+          urls,
+          tries,
+          null,
+          null
+        );
       }
     }
 
     if (!chosen) {
-      return {
-        status: "not_found",
-        summary: "Not found at OCPL",
-        detail: "OCPL did not return a strong title, author, or ISBN match from the catalog search.",
-        actionUrl: urls[0],
-        libraryName: settings.libraryName
-      };
+      return withLookupDebug(
+        {
+          status: "not_found",
+          summary: "Not found at OCPL",
+          detail: "OCPL did not return a strong title, author, or ISBN match from the catalog search.",
+          actionUrl: urls[0],
+          libraryName: settings.libraryName
+        },
+        includeDebug,
+        book,
+        urls,
+        tries,
+        null,
+        null
+      );
     }
 
     const { page, mergedFormats, facetMode } = chosen;
     const coarse = inferAvailability(page.text);
 
     if (mergedFormats.length === 0) {
-      return {
-        ...coarse,
-        detail: coarse.detail + CATALOG_LIVE_DETAIL,
-        actionUrl: page.url,
-        libraryName: settings.libraryName
-      };
+      return withLookupDebug(
+        {
+          ...coarse,
+          detail: coarse.detail + CATALOG_LIVE_DETAIL,
+          actionUrl: page.url,
+          libraryName: settings.libraryName
+        },
+        includeDebug,
+        book,
+        urls,
+        tries,
+        winningUrl,
+        winningIndex
+      );
     }
 
     if (facetMode) {
       const availableNowCount = extractAvailableNowFacetCount(page.text);
       const summaryBlock = summarizeFacetFormats(coarse, availableNowCount);
-      return {
-        ...summaryBlock,
-        actionUrl: page.url,
-        libraryName: settings.libraryName,
-        formats: mergedFormats.map((row) => {
-          const entry = {
-            bucket: row.bucket,
-            label: row.label,
-            availability: row.availability,
-            hint: row.hint
-          };
-          if (typeof row.count === "number") {
-            entry.count = row.count;
-          }
-          return entry;
-        })
-      };
+      return withLookupDebug(
+        {
+          ...summaryBlock,
+          actionUrl: page.url,
+          libraryName: settings.libraryName,
+          formats: mergedFormats.map((row) => {
+            const entry = {
+              bucket: row.bucket,
+              label: row.label,
+              availability: row.availability,
+              hint: row.hint
+            };
+            if (typeof row.count === "number") {
+              entry.count = row.count;
+            }
+            return entry;
+          })
+        },
+        includeDebug,
+        book,
+        urls,
+        tries,
+        winningUrl,
+        winningIndex
+      );
     }
 
     const summaryBlock = summarizeWithFormats(mergedFormats, coarse);
-    return {
-      ...summaryBlock,
-      actionUrl: page.url,
-      libraryName: settings.libraryName,
-      formats: mergedFormats.map((row) => ({
-        bucket: row.bucket,
-        label: row.label,
-        availability: row.availability,
-        hint: hintForAvailability(row.availability)
-      }))
-    };
+    return withLookupDebug(
+      {
+        ...summaryBlock,
+        actionUrl: page.url,
+        libraryName: settings.libraryName,
+        formats: mergedFormats.map((row) => ({
+          bucket: row.bucket,
+          label: row.label,
+          availability: row.availability,
+          hint: hintForAvailability(row.availability)
+        }))
+      },
+      includeDebug,
+      book,
+      urls,
+      tries,
+      winningUrl,
+      winningIndex
+    );
   }
 
   app.ocplPolarisConnector = {

@@ -120,6 +120,25 @@
       "requiredInPr": true
     },
     {
+      "id": "TC-US8-CONNECTOR-DEBUG",
+      "stories": ["US8", "US3", "US5"],
+      "kind": "connector",
+      "source": "fixture",
+      "fixtureId": "ocpl-isbn-available",
+      "expectedStatus": "available_now",
+      "includeDebug": true,
+      "requiredInPr": true
+    },
+    {
+      "id": "TC-US8-PAGE-DEBUG",
+      "stories": ["US8", "US1"],
+      "kind": "page",
+      "source": "fixture",
+      "fixtureId": "goodreads-render",
+      "expectedStatus": "available_now",
+      "requiredInPr": true
+    },
+    {
       "id": "TC-LIVE-US3-ISBN-KNOWN-BOOK",
       "stories": ["US3", "US4", "US5"],
       "kind": "connector",

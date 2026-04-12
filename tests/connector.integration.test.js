@@ -32,10 +32,14 @@ for (const testCase of connectorCases) {
     });
 
     const book = harness.toBookMetadata(fixture.book);
-    const result = await harness.connector.lookup(book, {
-      libraryName: "Onondaga County Public Library System",
-      catalogBaseUrl: "https://catalog.onlib.org/polaris/"
-    });
+    const result = await harness.connector.lookup(
+      book,
+      {
+        libraryName: "Onondaga County Public Library System",
+        catalogBaseUrl: "https://catalog.onlib.org/polaris/"
+      },
+      testCase.includeDebug ? { includeDebug: true } : undefined
+    );
 
     assert.equal(result.status, testCase.expectedStatus);
     assert.equal(result.libraryName, "Onondaga County Public Library System");
@@ -67,6 +71,17 @@ for (const testCase of connectorCases) {
       for (let i = 0; i < buckets.length; i++) {
         assert.equal(buckets[i], testCase.expectedFormatBuckets[i]);
       }
+    }
+
+    if (testCase.includeDebug) {
+      assert.ok(result.debug, `${testCase.id} should attach debug metadata`);
+      assert.equal(result.debug.source.title, fixture.book.title);
+      assert.ok(Array.isArray(result.debug.catalog.lookupUrlsOrdered));
+      assert.ok(Array.isArray(result.debug.catalog.tries));
+      assert.ok(result.debug.catalog.winningUrl);
+      assert.equal(typeof result.debug.catalog.winningIndex, "number");
+    } else {
+      assert.equal(result.debug, undefined, `${testCase.id} should omit debug unless requested`);
     }
   });
 }

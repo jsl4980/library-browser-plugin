@@ -145,3 +145,52 @@ test("TC-US7-PAGE-RENDER lists per-format availability on the card", async () =>
   assert.match(items[1].textContent, /E-book/);
   assert.match(items[2].textContent, /Audiobook/);
 });
+
+test("TC-US8-PAGE-DEBUG shows expandable metadata when testing option is enabled", async () => {
+  const testCase = pageCases.get("TC-US8-PAGE-DEBUG");
+  const catalogUrl = "https://catalog.onlib.org/polaris/view.aspx?isbn=9781234567897";
+  const debug = {
+    source: {
+      title: "The Testable Library",
+      author: "Ada Example",
+      isbn13: "9781234567897",
+      isbn10: "1234567890",
+      normalizedTitle: "the testable library",
+      normalizedAuthor: "ada example",
+      sourceSite: "goodreads",
+      sourceUrl: "https://www.goodreads.com/book/show/1-the-testable-library"
+    },
+    catalog: {
+      lookupUrlsOrdered: [catalogUrl],
+      tries: [{ url: catalogUrl, matched: true }],
+      winningUrl: catalogUrl,
+      winningIndex: 0
+    }
+  };
+
+  const harness = createPageHarness({
+    html: loadPageFixture("goodreads-book.html"),
+    url: "https://www.goodreads.com/book/show/1-the-testable-library",
+    storage: { showMetadataDebug: true },
+    runtimeResult: {
+      status: "available_now",
+      summary: "Available now at OCPL",
+      detail: "The catalog page indicates at least one available copy.",
+      actionUrl: catalogUrl,
+      libraryName: "Onondaga County Public Library System",
+      debug
+    }
+  });
+
+  await new Promise((resolve) => setImmediate(resolve));
+  const card = harness.getCard();
+  const debugBlock = card.querySelector(".library-browser-card__debug");
+  const debugBody = card.querySelector(".library-browser-card__debug-body");
+
+  assertTraceability({ stories, testCase });
+  assert.ok(card, "Expected a library card to be inserted");
+  assert.equal(harness.sentMessages[0].includeDebug, true);
+  assert.equal(debugBlock.hidden, false);
+  assert.match(debugBody.textContent, /lookupUrlsOrdered/);
+  assert.match(debugBody.textContent, /The Testable Library/);
+});

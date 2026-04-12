@@ -39,7 +39,11 @@ class FakeElement {
       const [, tagName, rawAttributes, innerContent] = match;
       const attributes = parseAttributes(rawAttributes);
       const child = new FakeElement(tagName, this.ownerDocument, attributes);
-      child.textContent = stripTags(innerContent).trim();
+      if (/<[a-z]/i.test(innerContent)) {
+        child.innerHTML = innerContent;
+      } else {
+        child.textContent = stripTags(innerContent).trim();
+      }
       this.appendChild(child);
     }
   }
@@ -53,7 +57,11 @@ class FakeElement {
   }
 
   querySelectorAll(selector) {
-    return this.children.filter((child) => matchesSimpleSelector(child, selector));
+    const direct = this.children.filter((child) => matchesSimpleSelector(child, selector));
+    const nested = this.children.flatMap((child) =>
+      typeof child.querySelectorAll === "function" ? child.querySelectorAll(selector) : []
+    );
+    return direct.concat(nested);
   }
 }
 

@@ -46,10 +46,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   void (async () => {
     try {
       const settings = await getSettings();
+      const includeDebug = Boolean(message.includeDebug);
       const cacheKey = [
         settings.libraryName,
         settings.catalogBaseUrl,
-        LibraryBrowser.bookMetadata.bestLookupKey(message.book)
+        LibraryBrowser.bookMetadata.bestLookupKey(message.book),
+        includeDebug ? "d:1" : "d:0"
       ].join("|");
       const cached = getCachedValue(cacheKey);
 
@@ -58,7 +60,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return;
       }
 
-      const result = await LibraryBrowser.ocplPolarisConnector.lookup(message.book, settings);
+      const result = await LibraryBrowser.ocplPolarisConnector.lookup(message.book, settings, {
+        includeDebug
+      });
       setCachedValue(cacheKey, result);
       sendResponse(result);
     } catch (error) {

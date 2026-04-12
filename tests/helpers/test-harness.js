@@ -23,9 +23,10 @@ function createConnectorHarness({ fetchImpl }) {
   };
 }
 
-function createPageHarness({ html, url, runtimeResult }) {
+function createPageHarness({ html, url, runtimeResult, storage }) {
   const document = createDocumentFromHtml(html);
   const sentMessages = [];
+  const storageValues = { showMetadataDebug: false, ...(storage || {}) };
 
   loadScripts(
     [
@@ -38,6 +39,13 @@ function createPageHarness({ html, url, runtimeResult }) {
       document,
       location: new URL(url),
       chrome: {
+        storage: {
+          sync: {
+            get() {
+              return Promise.resolve({ ...storageValues });
+            }
+          }
+        },
         runtime: {
           sendMessage(message) {
             sentMessages.push(message);

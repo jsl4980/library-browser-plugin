@@ -62,6 +62,33 @@
   text-decoration: underline;
 }
 
+.library-browser-card__debug {
+  margin: 12px 0 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #3d4a38;
+}
+
+.library-browser-card__debug-summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: #556b4d;
+}
+
+.library-browser-card__debug-body {
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  max-height: 220px;
+  overflow: auto;
+  border: 1px solid #c8d6c4;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.65);
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 11px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 #library-browser-card[data-status="found"] {
   border-color: #93b48a;
 }

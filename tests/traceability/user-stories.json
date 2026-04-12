@@ -26,5 +26,9 @@
   "US7": {
     "title": "Per-format catalog availability",
     "description": "As a user viewing a book on Goodreads or Amazon, I want to see which formats OCPL offers (print book, ebook, audiobook) and each format’s availability so I can choose how to borrow."
+  },
+  "US8": {
+    "title": "Metadata summary for testing and debugging",
+    "description": "As a tester, I want to turn on an option that shows a summary of the metadata used for the library lookup (what was read from the book page and what was used to query the catalog) both in the inline card and in the browser console, so I can debug incorrect results and report them accurately."
   }
 }

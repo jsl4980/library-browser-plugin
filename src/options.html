@@ -109,6 +109,16 @@
           placeholder="https://catalog.onlib.org/polaris/"
         ></textarea>
 
+        <label style="display: flex; align-items: flex-start; gap: 10px; font-weight: 700; margin-top: 20px">
+          <input
+            id="showMetadataDebug"
+            name="showMetadataDebug"
+            type="checkbox"
+            style="width: auto; margin-top: 4px"
+          />
+          <span>Show lookup metadata summary on book pages (for testing). Also logs the same data to the browser console with the prefix <code>[Library Browser]</code>.</span>
+        </label>
+
         <button type="submit">Save settings</button>
         <div id="status" aria-live="polite"></div>
       </form>

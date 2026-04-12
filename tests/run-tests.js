@@ -44,10 +44,14 @@ async function main() {
       });
 
       const book = harness.toBookMetadata(fixture.book);
-      const result = await harness.connector.lookup(book, {
-        libraryName: "Onondaga County Public Library System",
-        catalogBaseUrl: "https://catalog.onlib.org/polaris/"
-      });
+      const result = await harness.connector.lookup(
+        book,
+        {
+          libraryName: "Onondaga County Public Library System",
+          catalogBaseUrl: "https://catalog.onlib.org/polaris/"
+        },
+        testCase.includeDebug ? { includeDebug: true } : undefined
+      );
 
       assert.equal(result.status, testCase.expectedStatus);
       assert.equal(result.libraryName, "Onondaga County Public Library System");
@@ -67,6 +71,17 @@ async function main() {
         for (let i = 0; i < buckets.length; i++) {
           assert.equal(buckets[i], testCase.expectedFormatBuckets[i]);
         }
+      }
+
+      if (testCase.includeDebug) {
+        assert.ok(result.debug, `${testCase.id} should attach debug metadata`);
+        assert.equal(result.debug.source.title, fixture.book.title);
+        assert.ok(Array.isArray(result.debug.catalog.lookupUrlsOrdered));
+        assert.ok(Array.isArray(result.debug.catalog.tries));
+        assert.ok(result.debug.catalog.winningUrl);
+        assert.equal(typeof result.debug.catalog.winningIndex, "number");
+      } else {
+        assert.equal(result.debug, undefined, `${testCase.id} should omit debug unless requested`);
       }
     });
   }
@@ -206,6 +221,54 @@ async function main() {
     assert.equal(formatsList.hidden, false);
     assert.equal(items.length, 3);
     assert.match(items[0].textContent, /Print book/);
+  });
+
+  await run("TC-US8-PAGE-DEBUG shows expandable metadata when testing option is enabled", async () => {
+    const testCase = pageCases.get("TC-US8-PAGE-DEBUG");
+    const catalogUrl = "https://catalog.onlib.org/polaris/view.aspx?isbn=9781234567897";
+    const debug = {
+      source: {
+        title: "The Testable Library",
+        author: "Ada Example",
+        isbn13: "9781234567897",
+        isbn10: "1234567890",
+        normalizedTitle: "the testable library",
+        normalizedAuthor: "ada example",
+        sourceSite: "goodreads",
+        sourceUrl: "https://www.goodreads.com/book/show/1-the-testable-library"
+      },
+      catalog: {
+        lookupUrlsOrdered: [catalogUrl],
+        tries: [{ url: catalogUrl, matched: true }],
+        winningUrl: catalogUrl,
+        winningIndex: 0
+      }
+    };
+
+    const harness = createPageHarness({
+      html: loadPageFixture("goodreads-book.html"),
+      url: "https://www.goodreads.com/book/show/1-the-testable-library",
+      storage: { showMetadataDebug: true },
+      runtimeResult: {
+        status: "available_now",
+        summary: "Available now at OCPL",
+        detail: "The catalog page indicates at least one available copy.",
+        actionUrl: catalogUrl,
+        libraryName: "Onondaga County Public Library System",
+        debug
+      }
+    });
+
+    await new Promise((resolve) => setImmediate(resolve));
+    const card = harness.getCard();
+    const debugBody = card.querySelector(".library-browser-card__debug-body");
+
+    assertTraceability({ stories, testCase });
+    assert.ok(card, "Expected a library card to be inserted");
+    assert.equal(harness.sentMessages[0].includeDebug, true);
+    assert.equal(card.querySelector(".library-browser-card__debug").hidden, false);
+    assert.match(debugBody.textContent, /lookupUrlsOrdered/);
+    assert.match(debugBody.textContent, /The Testable Library/);
   });
 }
 

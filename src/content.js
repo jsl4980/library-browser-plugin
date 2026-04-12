@@ -17,6 +17,10 @@
       <div class="library-browser-card__title">Checking your catalog…</div>
       <div class="library-browser-card__detail">Looking for a title and author match.</div>
       <ul class="library-browser-card__formats" hidden></ul>
+      <details class="library-browser-card__debug" hidden>
+        <summary class="library-browser-card__debug-summary">Lookup metadata (testing)</summary>
+        <pre class="library-browser-card__debug-body"></pre>
+      </details>
       <a class="library-browser-card__action" href="#" target="_blank" rel="noreferrer noopener">Open library search</a>
     `;
     return card;
@@ -35,12 +39,14 @@
     return entry.label || "Format";
   }
 
-  function renderResult(card, result) {
+  function renderResult(card, result, renderOptions) {
     const title = card.querySelector(".library-browser-card__title");
     const detail = card.querySelector(".library-browser-card__detail");
     const formatsList = card.querySelector(".library-browser-card__formats");
     const action = card.querySelector(".library-browser-card__action");
     const badge = card.querySelector(".library-browser-card__eyebrow");
+    const debugBlock = card.querySelector(".library-browser-card__debug");
+    const debugBody = card.querySelector(".library-browser-card__debug-body");
 
     badge.textContent = result.libraryName ? `${result.libraryName}` : "Library Browser";
     title.textContent = result.summary;
@@ -76,6 +82,18 @@
     }
 
     card.dataset.status = result.status;
+
+    const showDebug = Boolean(renderOptions && renderOptions.showMetadataDebug && result.debug);
+    if (debugBlock && debugBody) {
+      if (showDebug) {
+        debugBlock.hidden = false;
+        debugBody.textContent = JSON.stringify(result.debug, null, 2);
+        console.log("[Library Browser]", result.debug);
+      } else {
+        debugBlock.hidden = true;
+        debugBody.textContent = "";
+      }
+    }
   }
 
   async function run() {
@@ -101,21 +119,28 @@
     const card = createCard();
     mountTarget.prepend(card);
 
+    const { showMetadataDebug = false } = await chrome.storage.sync.get({ showMetadataDebug: false });
+
     try {
       const result = await chrome.runtime.sendMessage({
         type: "libraryLookup",
-        book
+        book,
+        includeDebug: showMetadataDebug
       });
 
-      renderResult(card, result);
+      renderResult(card, result, { showMetadataDebug });
     } catch (error) {
-      renderResult(card, {
-        status: "error",
-        summary: "Lookup failed",
-        detail: error instanceof Error ? error.message : "Unexpected error while checking the catalog.",
-        actionUrl: "",
-        libraryName: ""
-      });
+      renderResult(
+        card,
+        {
+          status: "error",
+          summary: "Lookup failed",
+          detail: error instanceof Error ? error.message : "Unexpected error while checking the catalog.",
+          actionUrl: "",
+          libraryName: ""
+        },
+        { showMetadataDebug }
+      );
     }
   }
 
