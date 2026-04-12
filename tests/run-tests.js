@@ -191,6 +191,107 @@ async function main() {
     assert.equal(harness.sentMessages[0].book.isbn13, "");
   });
 
+  await run("TC-US3-EXACT-RELATED-SECTIONS renders exact and related blocks with distinct catalog links", async () => {
+    const testCase = pageCases.get("TC-US3-EXACT-RELATED-SECTIONS");
+    const isbnUrl = "https://catalog.onlib.org/polaris/view.aspx?isbn=9781234567897";
+    const keywordUrl =
+      "https://catalog.onlib.org/polaris/view.aspx?keyword=The%20Testable%20Library%20Ada%20Example";
+    const formatsExact = [
+      { bucket: "physical_book", label: "Book", availability: "available_now", hint: "Available now" },
+      { bucket: "ebook", label: "E-book", availability: "hold_available", hint: "Hold or request" }
+    ];
+    const formatsRelated = [
+      { bucket: "physical_book", label: "Book", availability: "hold_available", hint: "Place hold" }
+    ];
+
+    const harness = createPageHarness({
+      html: loadPageFixture("goodreads-book.html"),
+      url: "https://www.goodreads.com/book/show/1-the-testable-library",
+      runtimeResult: {
+        status: "available_now",
+        summary: "Available now at OCPL",
+        detail: "Print book: Available now E-book: Hold or request",
+        actionUrl: isbnUrl,
+        libraryName: "Onondaga County Public Library System",
+        formats: formatsExact,
+        exactMatch: {
+          status: "available_now",
+          summary: "Available now at OCPL",
+          detail: "Print book: Available now E-book: Hold or request",
+          actionUrl: isbnUrl,
+          libraryName: "Onondaga County Public Library System",
+          formats: formatsExact
+        },
+        relatedMatch: {
+          status: "hold_available",
+          summary: "Found at OCPL",
+          detail: "Other editions may be available.",
+          actionUrl: keywordUrl,
+          libraryName: "Onondaga County Public Library System",
+          formats: formatsRelated,
+          relatedUsedAuthor: true
+        }
+      }
+    });
+
+    await new Promise((resolve) => setImmediate(resolve));
+    const card = harness.getCard();
+    const exactWrap = card.querySelector(".library-browser-card__match--exact");
+    const relatedWrap = card.querySelector(".library-browser-card__match--related");
+    const exactAction = exactWrap.querySelector(".library-browser-card__action--exact");
+    const relatedAction = relatedWrap.querySelector(".library-browser-card__action--related");
+    const exactFormats = exactWrap.querySelectorAll(".library-browser-card__format");
+    const relatedFormats = relatedWrap.querySelectorAll(".library-browser-card__format");
+
+    assertTraceability({ stories, testCase });
+    assert.equal(card.dataset.status, testCase.expectedStatus);
+    assert.equal(exactWrap.hidden, false);
+    assert.equal(relatedWrap.hidden, false);
+    assert.equal(exactAction.textContent, "View exact match in catalog");
+    assert.equal(relatedAction.textContent, "View title & author search in catalog");
+    assert.equal(exactFormats.length, 2);
+    assert.equal(relatedFormats.length, 1);
+    assert.match(exactFormats[0].textContent, /Print book/);
+    assert.match(relatedFormats[0].textContent, /Print book/);
+  });
+
+  await run("TC-US3-RELATED-SECTION-ONLY shows related heading and link when there is no ISBN block", async () => {
+    const testCase = pageCases.get("TC-US3-RELATED-SECTION-ONLY");
+    const keywordUrl =
+      "https://catalog.onlib.org/polaris/view.aspx?keyword=Fallback%20Catalog%20Search%20Taylor%20Query";
+    const harness = createPageHarness({
+      html: loadPageFixture("goodreads-book.html"),
+      url: "https://www.goodreads.com/book/show/1-the-testable-library",
+      runtimeResult: {
+        status: "found",
+        summary: "Found at OCPL",
+        detail: "The book appears in the OCPL catalog.",
+        actionUrl: keywordUrl,
+        libraryName: "Onondaga County Public Library System",
+        relatedMatch: {
+          status: "found",
+          summary: "Found at OCPL",
+          detail: "The book appears in the OCPL catalog.",
+          actionUrl: keywordUrl,
+          libraryName: "Onondaga County Public Library System",
+          relatedUsedAuthor: true
+        }
+      }
+    });
+
+    await new Promise((resolve) => setImmediate(resolve));
+    const card = harness.getCard();
+    const exactWrap = card.querySelector(".library-browser-card__match--exact");
+    const relatedWrap = card.querySelector(".library-browser-card__match--related");
+    const relatedAction = relatedWrap.querySelector(".library-browser-card__action--related");
+
+    assertTraceability({ stories, testCase });
+    assert.equal(card.dataset.status, testCase.expectedStatus);
+    assert.equal(exactWrap.hidden, true);
+    assert.equal(relatedWrap.hidden, false);
+    assert.equal(relatedAction.textContent, "View title & author search in catalog");
+  });
+
   await run("TC-US7-PAGE-RENDER lists per-format availability on the card", async () => {
     const testCase = pageCases.get("TC-US7-PAGE-RENDER");
     const harness = createPageHarness({
@@ -239,7 +340,7 @@ async function main() {
       },
       catalog: {
         lookupUrlsOrdered: [catalogUrl],
-        tries: [{ url: catalogUrl, matched: true }],
+        tries: [{ kind: "isbn", url: catalogUrl, matched: true }],
         winningUrl: catalogUrl,
         winningIndex: 0
       }

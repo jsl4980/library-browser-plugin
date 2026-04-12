@@ -73,11 +73,23 @@ for (const testCase of connectorCases) {
       }
     }
 
+    if (testCase.id === "TC-US3-ISBN-AVAILABLE") {
+      assert.ok(result.exactMatch);
+      assert.equal(result.relatedMatch, undefined);
+    }
+
+    if (testCase.id === "TC-US3-TITLE-AUTHOR-FALLBACK") {
+      assert.ok(result.relatedMatch);
+      assert.equal(result.relatedMatch.relatedUsedAuthor, true);
+      assert.equal(result.exactMatch, undefined);
+    }
+
     if (testCase.includeDebug) {
       assert.ok(result.debug, `${testCase.id} should attach debug metadata`);
       assert.equal(result.debug.source.title, fixture.book.title);
       assert.ok(Array.isArray(result.debug.catalog.lookupUrlsOrdered));
       assert.ok(Array.isArray(result.debug.catalog.tries));
+      assert.ok(result.debug.catalog.tries.every((t) => typeof t.kind === "string"));
       assert.ok(result.debug.catalog.winningUrl);
       assert.equal(typeof result.debug.catalog.winningIndex, "number");
     } else {

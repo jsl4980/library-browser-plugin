@@ -21,15 +21,33 @@
   color: #556b4d;
 }
 
+.library-browser-card__match {
+  margin-bottom: 14px;
+}
+
+.library-browser-card__match:last-of-type {
+  margin-bottom: 0;
+}
+
+.library-browser-card__section-label {
+  margin: 0 0 8px;
+  padding: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #4a5c44;
+}
+
 .library-browser-card__title {
-  margin-bottom: 6px;
+  margin: 0 0 6px;
   font-size: 20px;
   font-weight: 700;
   line-height: 1.2;
 }
 
 .library-browser-card__detail {
-  margin-bottom: 10px;
+  margin: 0 0 10px;
   font-size: 14px;
   line-height: 1.5;
 }

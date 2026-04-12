@@ -149,6 +149,24 @@
       "requiredInPr": true
     },
     {
+      "id": "TC-US3-EXACT-RELATED-SECTIONS",
+      "stories": ["US3", "US4", "US7"],
+      "kind": "page",
+      "source": "fixture",
+      "fixtureId": "goodreads-render-formats",
+      "expectedStatus": "available_now",
+      "requiredInPr": true
+    },
+    {
+      "id": "TC-US3-RELATED-SECTION-ONLY",
+      "stories": ["US3", "US4", "US7"],
+      "kind": "page",
+      "source": "fixture",
+      "fixtureId": "goodreads-render",
+      "expectedStatus": "found",
+      "requiredInPr": true
+    },
+    {
       "id": "TC-LIVE-US3-ISBN-KNOWN-BOOK",
       "stories": ["US3", "US4", "US5"],
       "kind": "connector",

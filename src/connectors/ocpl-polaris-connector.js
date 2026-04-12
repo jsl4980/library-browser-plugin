@@ -13,28 +13,33 @@
     return new URL(pathAndQuery, baseUrl).toString();
   }
 
-  function buildLookupUrls(book, settings) {
+  function buildIsbnLookupUrl(book, settings) {
+    if (!book.isbn13 && !book.isbn10) {
+      return "";
+    }
     const baseUrl = getBaseUrl(settings);
-    const urls = [];
+    return joinUrl(baseUrl, `view.aspx?isbn=${encodeTemplateValue(book.isbn13 || book.isbn10)}`);
+  }
 
-    if (book.isbn13 || book.isbn10) {
-      urls.push(joinUrl(baseUrl, `view.aspx?isbn=${encodeTemplateValue(book.isbn13 || book.isbn10)}`));
+  /** Prefer title + author when both exist; otherwise title-only. */
+  function buildRelatedLookupUrl(book, settings) {
+    if (!book.title) {
+      return "";
     }
+    const baseUrl = getBaseUrl(settings);
+    const keyword =
+      book.title && book.author ? `${book.title} ${book.author}` : book.title;
+    return joinUrl(baseUrl, `view.aspx?keyword=${encodeTemplateValue(keyword)}`);
+  }
 
-    if (book.title) {
-      urls.push(joinUrl(baseUrl, `view.aspx?keyword=${encodeTemplateValue(book.title)}`));
-    }
+  function relatedLookupUsedAuthor(book) {
+    return Boolean(book.title && book.author);
+  }
 
-    if (book.title && book.author) {
-      urls.push(
-        joinUrl(
-          baseUrl,
-          `view.aspx?keyword=${encodeTemplateValue(`${book.title} ${book.author}`)}`
-        )
-      );
-    }
-
-    return urls;
+  function buildLookupUrlsOrdered(book, settings) {
+    const isbnUrl = buildIsbnLookupUrl(book, settings);
+    const relatedUrl = buildRelatedLookupUrl(book, settings);
+    return [isbnUrl, relatedUrl].filter(Boolean);
   }
 
   function searchResultsShellWantsAjaxFragment(html) {
@@ -630,6 +635,114 @@
   const CATALOG_LIVE_DETAIL =
     " Open the catalog for per-format copies and holds (live rows load in the browser).";
 
+  function analyzeCatalogPage(book, page) {
+    const normalizedPageText = normalizeText(page.text);
+    if (!pageHasMatch(book, normalizedPageText)) {
+      return { matched: false };
+    }
+
+    const tableFormats = extractFormatRowsFromHtml(page.text);
+    const searchHitFormats = extractSearchResultFormatRows(page.text, book);
+    const iconFormats = searchHitFormats.length
+      ? searchHitFormats
+      : extractTitleDetailFormatIconsFromHtml(page.text);
+    const structuredFormats = tableFormats.length ? tableFormats : iconFormats;
+    const facetFormats = structuredFormats.length ? [] : extractMaterialFacetFormats(page.text);
+    const mergedFormats = structuredFormats.length ? structuredFormats : facetFormats;
+    const facetMode = Boolean(!structuredFormats.length && facetFormats.length > 0);
+
+    return {
+      matched: true,
+      page,
+      mergedFormats,
+      facetMode
+    };
+  }
+
+  function shapeMatchFromAnalysis(book, settings, analysis) {
+    const { page, mergedFormats, facetMode } = analysis;
+    const coarse = inferAvailability(page.text);
+
+    if (mergedFormats.length === 0) {
+      return {
+        ...coarse,
+        detail: coarse.detail + CATALOG_LIVE_DETAIL,
+        actionUrl: page.url,
+        libraryName: settings.libraryName
+      };
+    }
+
+    if (facetMode) {
+      const availableNowCount = extractAvailableNowFacetCount(page.text);
+      const summaryBlock = summarizeFacetFormats(coarse, availableNowCount);
+      return {
+        ...summaryBlock,
+        actionUrl: page.url,
+        libraryName: settings.libraryName,
+        formats: mergedFormats.map((row) => {
+          const entry = {
+            bucket: row.bucket,
+            label: row.label,
+            availability: row.availability,
+            hint: row.hint
+          };
+          if (typeof row.count === "number") {
+            entry.count = row.count;
+          }
+          return entry;
+        })
+      };
+    }
+
+    const summaryBlock = summarizeWithFormats(mergedFormats, coarse);
+    return {
+      ...summaryBlock,
+      actionUrl: page.url,
+      libraryName: settings.libraryName,
+      formats: mergedFormats.map((row) => ({
+        bucket: row.bucket,
+        label: row.label,
+        availability: row.availability,
+        hint: row.availabilitySummary || hintForAvailability(row.availability)
+      }))
+    };
+  }
+
+  function formatRowSignature(row) {
+    const count = typeof row.count === "number" ? String(row.count) : "";
+    const hint = row.hint != null ? String(row.hint) : "";
+    return `${row.bucket}|${row.availability}|${hint}|${count}`;
+  }
+
+  function formatsAreEquivalent(a, b) {
+    if (!a && !b) {
+      return true;
+    }
+    if (!a || !b || a.length !== b.length) {
+      return false;
+    }
+    const sa = [...a].map(formatRowSignature).sort().join(";");
+    const sb = [...b].map(formatRowSignature).sort().join(";");
+    return sa === sb;
+  }
+
+  function relatedIsRedundant(exact, related) {
+    if (!exact || !related) {
+      return false;
+    }
+    if (!formatsAreEquivalent(exact.formats, related.formats)) {
+      return false;
+    }
+    if (exact.actionUrl === related.actionUrl) {
+      return true;
+    }
+    const noFormatRows = !exact.formats?.length && !related.formats?.length;
+    if (noFormatRows && exact.status === related.status && exact.summary === related.summary && exact.detail === related.detail) {
+      return true;
+    }
+    return false;
+  }
+
   function buildLookupDebug(book, urls, tries, winningUrl, winningIndex) {
     return {
       source: {
@@ -663,12 +776,12 @@
 
   async function lookup(book, settings, lookupOptions) {
     const includeDebug = Boolean(lookupOptions && lookupOptions.includeDebug);
-    const urls = buildLookupUrls(book, settings);
+    const isbnUrl = buildIsbnLookupUrl(book, settings);
+    const relatedUrl = buildRelatedLookupUrl(book, settings);
+    const lookupUrlsOrdered = buildLookupUrlsOrdered(book, settings);
     const tries = [];
-    let winningUrl = null;
-    let winningIndex = null;
 
-    if (!urls.length) {
+    if (!lookupUrlsOrdered.length) {
       return withLookupDebug(
         {
           status: "error",
@@ -679,157 +792,136 @@
         },
         includeDebug,
         book,
-        urls,
-        tries,
-        winningUrl,
-        winningIndex
-      );
-    }
-
-    let chosen = null;
-
-    for (let i = 0; i < urls.length; i++) {
-      const url = urls[i];
-      try {
-        const page = await fetchCatalogPage(url);
-        const normalizedPageText = normalizeText(page.text);
-        const matched = pageHasMatch(book, normalizedPageText);
-        tries.push({ url, matched });
-
-        if (!matched) {
-          continue;
-        }
-
-        const tableFormats = extractFormatRowsFromHtml(page.text);
-        const searchHitFormats = extractSearchResultFormatRows(page.text, book);
-        const iconFormats = searchHitFormats.length
-          ? searchHitFormats
-          : extractTitleDetailFormatIconsFromHtml(page.text);
-        const structuredFormats = tableFormats.length ? tableFormats : iconFormats;
-        const facetFormats = structuredFormats.length ? [] : extractMaterialFacetFormats(page.text);
-        const mergedFormats = structuredFormats.length ? structuredFormats : facetFormats;
-        const facetMode = Boolean(!structuredFormats.length && facetFormats.length > 0);
-
-        if (!chosen) {
-          chosen = { page, mergedFormats, facetMode };
-          winningUrl = page.url;
-          winningIndex = i;
-        }
-
-        if (mergedFormats.length > 0) {
-          chosen = { page, mergedFormats, facetMode };
-          winningUrl = page.url;
-          winningIndex = i;
-          break;
-        }
-      } catch (error) {
-        tries.push({
-          url,
-          matched: false,
-          error: error instanceof Error ? error.message : "Unexpected catalog lookup error."
-        });
-        return withLookupDebug(
-          {
-            status: "error",
-            summary: "Library search failed",
-            detail: error instanceof Error ? error.message : "Unexpected catalog lookup error.",
-            actionUrl: url,
-            libraryName: settings.libraryName
-          },
-          includeDebug,
-          book,
-          urls,
-          tries,
-          null,
-          null
-        );
-      }
-    }
-
-    if (!chosen) {
-      return withLookupDebug(
-        {
-          status: "not_found",
-          summary: "Not found at OCPL",
-          detail: "OCPL did not return a strong title, author, or ISBN match from the catalog search.",
-          actionUrl: urls[0],
-          libraryName: settings.libraryName
-        },
-        includeDebug,
-        book,
-        urls,
+        lookupUrlsOrdered,
         tries,
         null,
         null
       );
     }
 
-    const { page, mergedFormats, facetMode } = chosen;
-    const coarse = inferAvailability(page.text);
+    let exactMatch = null;
+    let relatedMatch = null;
 
-    if (mergedFormats.length === 0) {
+    const failFetch = (url, error) => {
+      const message = error instanceof Error ? error.message : "Unexpected catalog lookup error.";
       return withLookupDebug(
         {
-          ...coarse,
-          detail: coarse.detail + CATALOG_LIVE_DETAIL,
-          actionUrl: page.url,
+          status: "error",
+          summary: "Library search failed",
+          detail: message,
+          actionUrl: url,
           libraryName: settings.libraryName
         },
         includeDebug,
         book,
-        urls,
+        lookupUrlsOrdered,
         tries,
-        winningUrl,
-        winningIndex
+        null,
+        null
       );
+    };
+
+    if (isbnUrl) {
+      try {
+        const page = await fetchCatalogPage(isbnUrl);
+        const analysis = analyzeCatalogPage(book, page);
+        tries.push({
+          kind: "isbn",
+          url: isbnUrl,
+          matched: analysis.matched
+        });
+        if (analysis.matched) {
+          exactMatch = shapeMatchFromAnalysis(book, settings, analysis);
+        }
+      } catch (error) {
+        tries.push({
+          kind: "isbn",
+          url: isbnUrl,
+          matched: false,
+          error: error instanceof Error ? error.message : "Unexpected catalog lookup error."
+        });
+        return failFetch(isbnUrl, error);
+      }
     }
 
-    if (facetMode) {
-      const availableNowCount = extractAvailableNowFacetCount(page.text);
-      const summaryBlock = summarizeFacetFormats(coarse, availableNowCount);
+    if (relatedUrl) {
+      try {
+        const page = await fetchCatalogPage(relatedUrl);
+        const analysis = analyzeCatalogPage(book, page);
+        tries.push({
+          kind: "related",
+          url: relatedUrl,
+          matched: analysis.matched
+        });
+        if (analysis.matched) {
+          const candidate = shapeMatchFromAnalysis(book, settings, analysis);
+          if (!relatedIsRedundant(exactMatch, candidate)) {
+            relatedMatch = {
+              ...candidate,
+              relatedUsedAuthor: relatedLookupUsedAuthor(book)
+            };
+          }
+        }
+      } catch (error) {
+        tries.push({
+          kind: "related",
+          url: relatedUrl,
+          matched: false,
+          error: error instanceof Error ? error.message : "Unexpected catalog lookup error."
+        });
+        return failFetch(relatedUrl, error);
+      }
+    }
+
+    if (!exactMatch && !relatedMatch) {
       return withLookupDebug(
         {
-          ...summaryBlock,
-          actionUrl: page.url,
-          libraryName: settings.libraryName,
-          formats: mergedFormats.map((row) => {
-            const entry = {
-              bucket: row.bucket,
-              label: row.label,
-              availability: row.availability,
-              hint: row.hint
-            };
-            if (typeof row.count === "number") {
-              entry.count = row.count;
-            }
-            return entry;
-          })
+          status: "not_found",
+          summary: "Not found at OCPL",
+          detail: "OCPL did not return a strong title, author, or ISBN match from the catalog search.",
+          actionUrl: lookupUrlsOrdered[0],
+          libraryName: settings.libraryName
         },
         includeDebug,
         book,
-        urls,
+        lookupUrlsOrdered,
         tries,
-        winningUrl,
-        winningIndex
+        null,
+        null
       );
     }
 
-    const summaryBlock = summarizeWithFormats(mergedFormats, coarse);
+    const primary = exactMatch || relatedMatch;
+    let winningUrl = primary.actionUrl;
+    let winningIndex = null;
+    if (exactMatch && isbnUrl) {
+      winningIndex = lookupUrlsOrdered.indexOf(isbnUrl);
+    } else if (relatedMatch && relatedUrl) {
+      winningIndex = lookupUrlsOrdered.indexOf(relatedUrl);
+    }
+
+    const baseResult = {
+      status: primary.status,
+      summary: primary.summary,
+      detail: primary.detail,
+      actionUrl: primary.actionUrl,
+      libraryName: settings.libraryName
+    };
+    if (Array.isArray(primary.formats)) {
+      baseResult.formats = primary.formats;
+    }
+    if (exactMatch) {
+      baseResult.exactMatch = exactMatch;
+    }
+    if (relatedMatch) {
+      baseResult.relatedMatch = relatedMatch;
+    }
+
     return withLookupDebug(
-      {
-        ...summaryBlock,
-        actionUrl: page.url,
-        libraryName: settings.libraryName,
-        formats: mergedFormats.map((row) => ({
-          bucket: row.bucket,
-          label: row.label,
-          availability: row.availability,
-          hint: row.availabilitySummary || hintForAvailability(row.availability)
-        }))
-      },
+      baseResult,
       includeDebug,
       book,
-      urls,
+      lookupUrlsOrdered,
       tries,
       winningUrl,
       winningIndex
