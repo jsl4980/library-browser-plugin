@@ -138,7 +138,7 @@
     unknown: 1
   };
 
-  const BUCKET_ORDER = ["physical_book", "ebook", "audiobook"];
+  const BUCKET_ORDER = ["physical_book", "ebook", "audiobook", "other"];
 
   function stripMarkupNoise(html) {
     return html
@@ -161,11 +161,12 @@
     ) {
       return "audiobook";
     }
+    if (/\belectronic resources\b/.test(t) || /\boverdrive\b/.test(t)) {
+      return "other";
+    }
     if (
-      /^electronic resources$/.test(t) ||
       /\be-?book\b/.test(t) ||
       /\bebook\b/.test(t) ||
-      /\boverdrive\b/.test(t) ||
       /\bdigital\b/.test(t) ||
       /\bdownloadable\b/.test(t)
     ) {
@@ -177,7 +178,7 @@
     if (/\bbook\b/.test(t) && !/audio/.test(t)) {
       return "physical_book";
     }
-    return null;
+    return "other";
   }
 
   function extractTypeOfMaterialFacetSlice(html) {
@@ -236,6 +237,22 @@
 
     const byBucket = new Map();
     for (const row of raw) {
+      if (row.bucket === "other") {
+        const prev = byBucket.get("other");
+        if (!prev) {
+          byBucket.set("other", { ...row });
+        } else {
+          const sum = prev.count + row.count;
+          byBucket.set("other", {
+            bucket: "other",
+            label: prev.label,
+            count: sum,
+            availability: "found",
+            hint: `About ${sum} matches`
+          });
+        }
+        continue;
+      }
       const prev = byBucket.get(row.bucket);
       if (!prev || row.count > prev.count) {
         byBucket.set(row.bucket, row);
@@ -259,7 +276,10 @@
   }
 
   function classifyMaterialType(text) {
-    const t = text.toLowerCase();
+    const t = text.toLowerCase().trim();
+    if (!t) {
+      return null;
+    }
     if (
       /\baudiobook\b/.test(t) ||
       /\baudio book\b/.test(t) ||
@@ -276,7 +296,6 @@
       /\be-?book\b/.test(t) ||
       /\bebook\b/.test(t) ||
       /\bdownloadable ebook\b/.test(t) ||
-      /\boverdrive\b/.test(t) ||
       /\bepub\b/.test(t) ||
       /\bkindle\b/.test(t) ||
       /\bdigital book\b/.test(t) ||
@@ -284,6 +303,9 @@
       /\belr\b/.test(t)
     ) {
       return "ebook";
+    }
+    if (/\belectronic resources\b/.test(t) || /\boverdrive\b/.test(t)) {
+      return "other";
     }
     if (
       /\bbook\b/.test(t) ||
@@ -361,7 +383,8 @@
     const fragmentAvail = inferAvailabilityForFragment(blockText);
     let availability = fragmentAvail;
     if (fragmentAvail === "unknown") {
-      availability = /ebook|overdrive|epub|kindle|digital|adobe epub/i.test(blockText) ? "hold_available" : "found";
+      availability =
+        /ebook|overdrive|epub|kindle|digital|adobe epub|electronic resources/i.test(blockText) ? "hold_available" : "found";
     }
 
     const summary =
@@ -527,6 +550,9 @@
       if (/^format$/i.test(formatLabel)) {
         continue;
       }
+      if (/^\s*\d+\.?\s*$/i.test(formatLabel)) {
+        continue;
+      }
 
       const bucket = classifyMaterialType(`${formatLabel} ${rest}`);
       if (!bucket) {
@@ -561,7 +587,9 @@
           ? "E-book"
           : row.bucket === "audiobook"
             ? "Audiobook"
-            : row.label;
+            : row.bucket === "other"
+              ? "Other formats"
+              : row.label;
     if (row.availabilitySummary) {
       return `${displayName}: ${row.availabilitySummary}`;
     }

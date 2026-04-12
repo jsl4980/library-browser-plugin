@@ -71,7 +71,7 @@
       "source": "fixture",
       "fixtureId": "ocpl-narrow-facets",
       "expectedStatus": "available_now",
-      "expectedFormatBuckets": ["physical_book", "ebook", "audiobook"],
+      "expectedFormatBuckets": ["physical_book", "audiobook", "other"],
       "requiredInPr": true
     },
     {
@@ -81,7 +81,17 @@
       "source": "fixture",
       "fixtureId": "ocpl-phm-isbn-multi-hit",
       "expectedStatus": "available_now",
-      "expectedFormatBuckets": ["physical_book", "ebook"],
+      "expectedFormatBuckets": ["physical_book", "ebook", "other"],
+      "requiredInPr": true
+    },
+    {
+      "id": "TC-US7-WINGS-FIRE-FORMATS",
+      "stories": ["US7", "US4", "US5"],
+      "kind": "connector",
+      "source": "fixture",
+      "fixtureId": "ocpl-wings-dragonet-search",
+      "expectedStatus": "available_now",
+      "expectedFormatBuckets": ["physical_book", "audiobook", "other"],
       "requiredInPr": true
     },
     {

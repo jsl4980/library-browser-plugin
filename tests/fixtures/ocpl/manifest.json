@@ -152,6 +152,23 @@
       "responseFile": "ocpl-phm-isbn-combined.html",
       "responseStatus": 200,
       "expectedStatus": "available_now"
+    },
+    {
+      "id": "ocpl-wings-dragonet-search",
+      "captureDate": "2026-04-12",
+      "originatingUrlPattern": "https://catalog.onlib.org/polaris/search/searchresults.aspx*",
+      "stories": ["US7", "US4", "US5"],
+      "book": {
+        "title": "The Dragonet Prophecy",
+        "author": "Tui T. Sutherland",
+        "isbn13": "",
+        "isbn10": "",
+        "sourceSite": "goodreads",
+        "sourceUrl": "https://www.goodreads.com/book/show/wings-of-fire-1"
+      },
+      "responseFile": "wings-of-fire-ocpl-results.html.html",
+      "responseStatus": 200,
+      "expectedStatus": "available_now"
     }
   ]
 }

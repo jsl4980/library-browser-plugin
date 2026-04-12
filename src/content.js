@@ -52,6 +52,9 @@
     if (entry.bucket === "audiobook") {
       return "Audiobook";
     }
+    if (entry.bucket === "other") {
+      return "Other formats";
+    }
     return entry.label || "Format";
   }
 
