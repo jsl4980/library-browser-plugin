@@ -3,9 +3,13 @@
   "name": "Library Browser Plugin",
   "version": "0.1.0",
   "description": "See whether books you find on Goodreads and Amazon appear in your library catalog.",
+  "icons": {
+    "16": "icons/icon128.png",
+    "48": "icons/icon128.png",
+    "128": "icons/icon128.png"
+  },
   "permissions": [
-    "storage",
-    "permissions"
+    "storage"
   ],
   "optional_host_permissions": [
     "https://catalog.onlib.org/*"

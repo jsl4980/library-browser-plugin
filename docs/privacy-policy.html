@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Privacy Policy — Library Browser Plugin</title>
+  <style>
+    body { font-family: system-ui, sans-serif; line-height: 1.5; max-width: 42rem; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
+    h1 { font-size: 1.5rem; }
+    h2 { font-size: 1.125rem; margin-top: 1.5rem; }
+    p, li { font-size: 0.9375rem; }
+    .muted { color: #555; font-size: 0.875rem; }
+  </style>
+</head>
+<body>
+  <h1>Privacy Policy</h1>
+  <p class="muted">Library Browser Plugin — last updated: April 12, 2026</p>
+
+  <p>
+    This extension helps you see whether books on Goodreads or Amazon may appear in a public library catalog you configure.
+    It is designed to collect as little data as possible.
+  </p>
+
+  <h2>What stays on your device</h2>
+  <ul>
+    <li>Extension settings (such as library name and catalog base URL) are stored with Chrome’s <code>chrome.storage.sync</code> and stay under your Google account’s sync rules, like other extension settings.</li>
+    <li>Short-lived in-memory caches may be used to avoid repeating the same catalog lookup during a browsing session.</li>
+  </ul>
+
+  <h2>What leaves your device</h2>
+  <ul>
+    <li>When you visit a supported book page, the extension reads page content that is already visible to you in the tab (for example title, author, ISBN) to perform a lookup.</li>
+    <li>If you grant optional access to your library catalog host, the extension sends <strong>search-style requests</strong> to that catalog (for example keyword or ISBN search URLs) to retrieve public catalog HTML. Those requests go directly to the catalog site you configured, not to servers operated by the extension author.</li>
+    <li>The extension does not run analytics, ads, or third-party trackers as part of its code.</li>
+  </ul>
+
+  <h2>Permissions</h2>
+  <ul>
+    <li><strong>storage</strong> — saves your options.</li>
+    <li><strong>Optional host access</strong> — the catalog origin is listed as optional; the extension only receives it if you approve the prompt from the options page (default configuration targets the Onondaga County Public Library Polaris catalog).</li>
+  </ul>
+
+  <h2>Children</h2>
+  <p>This extension is not directed at children under 13, and it does not knowingly collect personal information from children.</p>
+
+  <h2>Changes</h2>
+  <p>We may update this policy when the extension’s behavior changes. The “last updated” date above will change when it does.</p>
+
+  <h2>Contact</h2>
+  <p>
+    For privacy questions, contact the developer using the support email or contact URL provided on the Chrome Web Store listing.
+  </p>
+</body>
+</html>

@@ -36,6 +36,10 @@ Default:
 
 The next improvement is to deepen the Polaris parsing so the extension can distinguish branch-level copy availability, holdability, and format with higher confidence.
 
+## Chrome Web Store
+
+Build a store ZIP (tests run first), then follow listing, privacy, API, and GitHub Actions steps in [docs/CHROME_WEB_STORE.md](docs/CHROME_WEB_STORE.md). Host [docs/privacy-policy.html](docs/privacy-policy.html) at a public HTTPS URL for the store’s privacy disclosure.
+
 ## Tests
 
 - Run fixture-backed integration tests with `npm test`

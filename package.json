@@ -5,6 +5,10 @@
   "description": "Browser extension scaffold for checking OCPL availability from Goodreads and Amazon.",
   "scripts": {
     "test": "node tests/run-tests.js",
-    "test:live": "node tests/run-live-tests.js"
+    "test:live": "node tests/run-live-tests.js",
+    "pack": "node scripts/pack-extension.js"
+  },
+  "devDependencies": {
+    "archiver": "^7.0.1"
   }
 }
