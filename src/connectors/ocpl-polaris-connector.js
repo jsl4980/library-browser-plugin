@@ -299,6 +299,125 @@
     return m ? m[1].trim() : "";
   }
 
+  function splitSearchResultModules(html) {
+    const re = /<div\b[^>]*\bcontent-module--search-result\b[^>]*>/gi;
+    const starts = [];
+    let m;
+
+    while ((m = re.exec(html)) !== null) {
+      starts.push(m.index);
+    }
+
+    if (!starts.length) {
+      return [];
+    }
+
+    return starts.map((start, i) => {
+      const end = i + 1 < starts.length ? starts[i + 1] : html.length;
+      return html.slice(start, end);
+    });
+  }
+
+  function parseLocalSystemFromVisibleText(text) {
+    const local = text.match(/Local Availability:\s*(\d+)\s*\(\s*of\s+(\d+)\s*\)/i);
+    const system = text.match(/System Availability:\s*(\d+)/i);
+    if (!local) {
+      return {
+        localPresent: false,
+        localAvailable: 0,
+        localTotal: 0,
+        systemAvailable: system ? parseInt(system[1], 10) : 0
+      };
+    }
+
+    return {
+      localPresent: true,
+      localAvailable: parseInt(local[1], 10),
+      localTotal: parseInt(local[2], 10),
+      systemAvailable: system ? parseInt(system[1], 10) : 0
+    };
+  }
+
+  function deriveAvailabilityForSearchResultBlock(counts, blockText) {
+    if (counts.localPresent) {
+      const { localAvailable, localTotal, systemAvailable } = counts;
+      const summary = `Local ${localAvailable} (of ${localTotal}), System ${systemAvailable}`;
+      let availability;
+      if (localAvailable > 0) {
+        availability = "available_now";
+      } else if (systemAvailable > 0) {
+        availability = "hold_available";
+      } else {
+        availability = "found";
+      }
+      return { availability, summary, localAvailable, systemAvailable };
+    }
+
+    const fragmentAvail = inferAvailabilityForFragment(blockText);
+    let availability = fragmentAvail;
+    if (fragmentAvail === "unknown") {
+      availability = /ebook|overdrive|epub|kindle|digital|adobe epub/i.test(blockText) ? "hold_available" : "found";
+    }
+
+    const summary =
+      fragmentAvail === "available_now"
+        ? "Available now"
+        : fragmentAvail === "hold_available" || availability === "hold_available"
+          ? "Place hold (sign in for access)"
+          : null;
+
+    return { availability, summary, localAvailable: undefined, systemAvailable: undefined };
+  }
+
+  function extractSearchResultFormatRows(html, book) {
+    const blocks = splitSearchResultModules(html);
+    if (!blocks.length) {
+      return [];
+    }
+
+    const norm13 = book.isbn13 ? normalizeText(book.isbn13) : "";
+    const norm10 = book.isbn10 ? normalizeText(book.isbn10) : "";
+    const parsed = [];
+
+    for (const block of blocks) {
+      const blockText = htmlToVisibleText(block);
+      const isbnPreferredMatch =
+        Boolean(norm13 && blockText.toLowerCase().includes(norm13)) ||
+        Boolean(norm10 && norm10.length >= 10 && blockText.toLowerCase().includes(norm10));
+
+      const counts = parseLocalSystemFromVisibleText(blockText);
+      const derived = deriveAvailabilityForSearchResultBlock(counts, blockText);
+
+      const imgTagPattern = /<img\b[^>]*\bc-title-detail-formats__img\b[^>]*>/gi;
+      let match;
+
+      while ((match = imgTagPattern.exec(block)) !== null) {
+        const tag = match[0];
+        const title = readImgAttribute(tag, "title");
+        const alt = readImgAttribute(tag, "alt");
+        const label = title || alt;
+        if (!label) {
+          continue;
+        }
+        const bucket = classifyMaterialType(label);
+        if (!bucket) {
+          continue;
+        }
+        parsed.push({
+          bucket,
+          label,
+          availability: derived.availability,
+          availabilitySummary: derived.summary,
+          isbnPreferredMatch: Boolean(isbnPreferredMatch),
+          localAvailable: derived.localAvailable,
+          systemAvailable: derived.systemAvailable
+        });
+      }
+    }
+
+    return mergeFormatsByBucket(parsed);
+  }
+
   function extractTitleDetailFormatIconsFromHtml(html) {
     const imgTagPattern = /<img\b[^>]*\bc-title-detail-formats__img\b[^>]*>/gi;
     const parsed = [];
@@ -341,11 +460,32 @@
     return "unknown";
   }
 
+  function rowBeatsCandidate(a, b) {
+    const am = a.isbnPreferredMatch ? 1 : 0;
+    const bm = b.isbnPreferredMatch ? 1 : 0;
+    if (am !== bm) {
+      return am > bm;
+    }
+    const ra = AVAILABILITY_RANK[a.availability];
+    const rb = AVAILABILITY_RANK[b.availability];
+    if (ra !== rb) {
+      return ra > rb;
+    }
+    const la = typeof a.localAvailable === "number" ? a.localAvailable : -1;
+    const lb = typeof b.localAvailable === "number" ? b.localAvailable : -1;
+    if (la !== lb) {
+      return la > lb;
+    }
+    const sa = typeof a.systemAvailable === "number" ? a.systemAvailable : -1;
+    const sb = typeof b.systemAvailable === "number" ? b.systemAvailable : -1;
+    return sa > sb;
+  }
+
   function mergeFormatsByBucket(rows) {
     const best = new Map();
     for (const row of rows) {
       const prev = best.get(row.bucket);
-      if (!prev || AVAILABILITY_RANK[row.availability] > AVAILABILITY_RANK[prev.availability]) {
+      if (!prev || rowBeatsCandidate(row, prev)) {
         best.set(row.bucket, row);
       }
     }
@@ -408,20 +548,23 @@
     return "Availability unclear";
   }
 
+  function formatRowDetailLine(row) {
+    const displayName =
+      row.bucket === "physical_book"
+        ? "Print book"
+        : row.bucket === "ebook"
+          ? "E-book"
+          : row.bucket === "audiobook"
+            ? "Audiobook"
+            : row.label;
+    if (row.availabilitySummary) {
+      return `${displayName}: ${row.availabilitySummary}`;
+    }
+    return `${displayName}: ${hintForAvailability(row.availability)}`;
+  }
+
   function summarizeWithFormats(mergedFormats, coarse) {
-    const detail = mergedFormats
-      .map((row) => {
-        const displayName =
-          row.bucket === "physical_book"
-            ? "Print book"
-            : row.bucket === "ebook"
-              ? "E-book"
-              : row.bucket === "audiobook"
-                ? "Audiobook"
-                : row.label;
-        return `${displayName}: ${hintForAvailability(row.availability)}`;
-      })
-      .join(" · ");
+    const detail = mergedFormats.map((row) => formatRowDetailLine(row)).join(" · ");
 
     if (mergedFormats.some((row) => row.availability === "available_now")) {
       return {
@@ -558,7 +701,10 @@
         }
 
         const tableFormats = extractFormatRowsFromHtml(page.text);
-        const iconFormats = extractTitleDetailFormatIconsFromHtml(page.text);
+        const searchHitFormats = extractSearchResultFormatRows(page.text, book);
+        const iconFormats = searchHitFormats.length
+          ? searchHitFormats
+          : extractTitleDetailFormatIconsFromHtml(page.text);
         const structuredFormats = tableFormats.length ? tableFormats : iconFormats;
         const facetFormats = structuredFormats.length ? [] : extractMaterialFacetFormats(page.text);
         const mergedFormats = structuredFormats.length ? structuredFormats : facetFormats;
@@ -678,7 +824,7 @@
           bucket: row.bucket,
           label: row.label,
           availability: row.availability,
-          hint: hintForAvailability(row.availability)
+          hint: row.availabilitySummary || hintForAvailability(row.availability)
         }))
       },
       includeDebug,

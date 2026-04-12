@@ -80,7 +80,7 @@
       "kind": "connector",
       "source": "fixture",
       "fixtureId": "ocpl-phm-isbn-multi-hit",
-      "expectedStatus": "hold_available",
+      "expectedStatus": "available_now",
       "expectedFormatBuckets": ["physical_book", "ebook"],
       "requiredInPr": true
     },
