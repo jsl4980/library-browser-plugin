@@ -18,13 +18,13 @@ Upload either file to the [Chrome Web Store Developer Dashboard](https://chrome.
 
 ## 2. Privacy policy URL (listing requirement)
 
-Host [privacy-policy.html](privacy-policy.html) at a **stable public HTTPS URL** and paste that URL into the store listing (Privacy practices).
+Commit [privacy-policy.md](privacy-policy.md) on your default branch and paste a **stable public HTTPS URL** into the store listing (Privacy practices). The Chrome Web Store accepts policy links that point at GitHub.
 
-**GitHub Pages (typical):**
+**GitHub (typical):** use the rendered Markdown view for readability:
 
-1. Commit `docs/privacy-policy.html` on your default branch.
-2. Repository **Settings → Pages**: source **Deploy from a branch**, folder **`/docs`** (or use `/ (root)` and move the file—adjust paths accordingly).
-3. Your policy URL will look like: `https://<user-or-org>.github.io/<repo>/privacy-policy.html` (exact path depends on Pages configuration).
+`https://github.com/<user-or-org>/<repo>/blob/<default-branch>/docs/privacy-policy.md`
+
+Replace `<user-or-org>`, `<repo>`, and `<default-branch>` (often `main`) with your repository details.
 
 Optional: set **`homepage_url`** in `manifest.json` to the same URL so the store and browser can link to it.
 
@@ -34,7 +34,7 @@ You complete this once per extension to create the item and obtain the **extensi
 
 1. Pay the [developer signup fee](https://developer.chrome.com/docs/webstore/register) if you have not already.
 2. In the [Developer Dashboard](https://chrome.google.com/webstore/devconsole), **Add new item** and upload `dist/library-browser-plugin.zip`.
-3. Fill in listing text, screenshots, category, and **privacy** disclosures to match [privacy-policy.html](privacy-policy.html).
+3. Fill in listing text, screenshots, category, and **privacy** disclosures to match [privacy-policy.md](privacy-policy.md).
 4. Copy the **extension ID** from the item page (32-character string). You need it for API/CI uploads.
 
 Subsequent updates can reuse **Upload new package** in the dashboard, or use the Publish API / GitHub Action below.

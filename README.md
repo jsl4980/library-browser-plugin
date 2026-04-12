@@ -38,7 +38,7 @@ The next improvement is to deepen the Polaris parsing so the extension can disti
 
 ## Chrome Web Store
 
-Build a store ZIP (tests run first), then follow listing, privacy, API, and GitHub Actions steps in [docs/CHROME_WEB_STORE.md](docs/CHROME_WEB_STORE.md). Host [docs/privacy-policy.html](docs/privacy-policy.html) at a public HTTPS URL for the store’s privacy disclosure.
+Build a store ZIP (tests run first), then follow listing, privacy, API, and GitHub Actions steps in [docs/CHROME_WEB_STORE.md](docs/CHROME_WEB_STORE.md). For the store’s privacy disclosure, use a public HTTPS URL to [docs/privacy-policy.md](docs/privacy-policy.md) (for example the GitHub blob URL described in that doc).
 
 ## Tests
 
