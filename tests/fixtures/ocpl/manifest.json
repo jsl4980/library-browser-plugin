@@ -135,6 +135,23 @@
       "responseFile": "ocpl-narrow-facets.html",
       "responseStatus": 200,
       "expectedStatus": "available_now"
+    },
+    {
+      "id": "ocpl-phm-isbn-multi-hit",
+      "captureDate": "2026-04-12",
+      "originatingUrlPattern": "https://catalog.onlib.org/polaris/search/searchresults.aspx*",
+      "stories": ["US3", "US5", "US7"],
+      "book": {
+        "title": "Project Hail Mary",
+        "author": "Andy Weir",
+        "isbn13": "9780593135211",
+        "isbn10": "0593135211",
+        "sourceSite": "goodreads",
+        "sourceUrl": "https://www.goodreads.com/book/show/54493401-project-hail-mary"
+      },
+      "responseFile": "ocpl-phm-isbn-combined.html",
+      "responseStatus": 200,
+      "expectedStatus": "hold_available"
     }
   ]
 }

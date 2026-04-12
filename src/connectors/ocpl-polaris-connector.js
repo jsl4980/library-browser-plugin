@@ -37,8 +37,15 @@
     return urls;
   }
 
-  async function fetchCatalogPage(url) {
-    const response = await fetch(url, {
+  function searchResultsShellWantsAjaxFragment(html) {
+    return (
+      /ajaxLoadResultsPage\s*\(/.test(html) &&
+      !/\bc-title-detail-formats__img\b/i.test(html)
+    );
+  }
+
+  async function fetchCatalogPage(requestUrl) {
+    const response = await fetch(requestUrl, {
       method: "GET",
       // Same-origin catalog cookies avoid Polaris redirect loops (see redirect cap).
       credentials: "include"
@@ -48,9 +55,27 @@
       throw new Error(`Catalog request returned ${response.status}.`);
     }
 
+    const finalUrl = response.url || requestUrl;
+    let text = await response.text();
+
+    if (searchResultsShellWantsAjaxFragment(text)) {
+      try {
+        const ajaxUrl = new URL("components/ajaxResults.aspx?page=1", finalUrl);
+        const ajaxResponse = await fetch(ajaxUrl.toString(), {
+          method: "GET",
+          credentials: "include"
+        });
+        if (ajaxResponse.ok) {
+          text += await ajaxResponse.text();
+        }
+      } catch {
+        // Keep shell-only HTML if the follow-up request fails.
+      }
+    }
+
     return {
-      url,
-      text: await response.text()
+      url: finalUrl,
+      text
     };
   }
 
@@ -267,6 +292,40 @@
     return null;
   }
 
+  function readImgAttribute(tag, attr) {
+    const doubleQuoted = new RegExp(`${attr}="([^"]*)"`, "i");
+    const singleQuoted = new RegExp(`${attr}='([^']*)'`, "i");
+    const m = tag.match(doubleQuoted) || tag.match(singleQuoted);
+    return m ? m[1].trim() : "";
+  }
+
+  function extractTitleDetailFormatIconsFromHtml(html) {
+    const imgTagPattern = /<img\b[^>]*\bc-title-detail-formats__img\b[^>]*>/gi;
+    const parsed = [];
+    let match;
+
+    while ((match = imgTagPattern.exec(html)) !== null) {
+      const tag = match[0];
+      const title = readImgAttribute(tag, "title");
+      const alt = readImgAttribute(tag, "alt");
+      const label = title || alt;
+      if (!label) {
+        continue;
+      }
+      const bucket = classifyMaterialType(label);
+      if (!bucket) {
+        continue;
+      }
+      parsed.push({
+        bucket,
+        label,
+        availability: inferAvailabilityForFragment(label)
+      });
+    }
+
+    return mergeFormatsByBucket(parsed);
+  }
+
   function inferAvailabilityForFragment(text) {
     if (/available now\s*\(\s*[1-9]/i.test(text) || /\bon shelf\b/i.test(text)) {
       return "available_now";
@@ -381,10 +440,11 @@
     }
 
     if (mergedFormats.every((row) => row.availability === "unknown")) {
+      const mergedDetail = [detail, coarse.detail].filter(Boolean).join(" ").trim();
       return {
         status: coarse.status,
         summary: coarse.summary,
-        detail: detail || coarse.detail
+        detail: mergedDetail || coarse.detail
       };
     }
 
@@ -498,9 +558,11 @@
         }
 
         const tableFormats = extractFormatRowsFromHtml(page.text);
-        const facetFormats = tableFormats.length ? [] : extractMaterialFacetFormats(page.text);
-        const mergedFormats = tableFormats.length ? tableFormats : facetFormats;
-        const facetMode = Boolean(!tableFormats.length && facetFormats.length > 0);
+        const iconFormats = extractTitleDetailFormatIconsFromHtml(page.text);
+        const structuredFormats = tableFormats.length ? tableFormats : iconFormats;
+        const facetFormats = structuredFormats.length ? [] : extractMaterialFacetFormats(page.text);
+        const mergedFormats = structuredFormats.length ? structuredFormats : facetFormats;
+        const facetMode = Boolean(!structuredFormats.length && facetFormats.length > 0);
 
         if (!chosen) {
           chosen = { page, mergedFormats, facetMode };

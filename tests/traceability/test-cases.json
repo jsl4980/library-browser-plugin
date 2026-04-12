@@ -75,6 +75,16 @@
       "requiredInPr": true
     },
     {
+      "id": "TC-US7-PHM-ISBN-ICONS",
+      "stories": ["US3", "US5", "US7"],
+      "kind": "connector",
+      "source": "fixture",
+      "fixtureId": "ocpl-phm-isbn-multi-hit",
+      "expectedStatus": "hold_available",
+      "expectedFormatBuckets": ["physical_book", "ebook"],
+      "requiredInPr": true
+    },
+    {
       "id": "TC-US1-GOODREADS-RENDER",
       "stories": ["US1", "US4"],
       "kind": "page",

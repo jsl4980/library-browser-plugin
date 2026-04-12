@@ -1,0 +1,744 @@
+﻿<!DOCTYPE html><html><head></head><body>
+<script language='javascript'> $(document).ready(function () { ajaxLoadResultsPage(1, 0, null, 0); }); </script>
+<div id='searchResults'><img src='https://catalog.onlib.org/polaris/themes/shared/waiting.gif' alt='' /></div>
+
+
+<div id="IsOverdriveVendorAccountPresent">
+</div>
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {         
+            $(".c-title-detail-actions__oneclick").on("click", function (e) {
+                var id = $(this).attr('data-recordid');
+
+                $("#oneclick_" + id).addClass('c-title-detail__disable_a_href');
+                var strOK = "OK";
+                PlaceOneClickHoldRequest(id, strOK, e);
+            });
+
+            
+                        
+       });
+    </script>
+
+
+    <script type="text/javascript">
+
+        function processDynamicLinksResponse(booksInfo) 
+        {
+            for (id in booksInfo) 
+            {
+                if (booksInfo[id] && booksInfo[id].preview == 'partial' && booksInfo[id].embeddable == true)
+                {
+                    $('.gbs-preview-div').each(function () 
+                    {
+                        if ($(this).attr('id').indexOf(id) != -1) {
+                            $(this).show();
+                        }
+                    });
+                }
+            }
+        }
+        
+  
+
+    </script>
+
+
+
+
+<div class='c-results-utility c-results-utility--full'>
+  <div class="c-results-utility__container c-results-utility__container--result-count">
+    <div class="c-results-utility-result-count">
+        1
+        -
+        3
+        of
+        3
+    </div>
+    <div class="c-results-utility-per-page form-inline">  
+      <div class="c-results-utility-per-page__select-container select-styled">    
+        <select aria-label="Results per page dropdown" class="c-results-utility-per-page__select" id="dropdownResultsPerPageTop" onchange="javascript:ajaxLoadResultsPage(1, 0, 'Top', 0);">
+           <option value="10" selected>10</option>
+           <option value="20">20</option>
+           <option value="30">30</option>
+           <option value="50">50</option>
+           <option value="100">100</option>
+        </select>
+      </div>
+      <span aria-label="per page"  class="c-results-utility-per-page__label">per page</span>
+    </div>
+  </div>
+
+  
+      <div class="c-results-utility__container c-results-utility__container--sort-narrow c-results-utility__container--affix">
+
+        
+          <div class="c-results-utility-sort">
+            <label for="dropdownSortByTop" class="c-results-utility-sort__label">Sort</label>
+            <div class="c-results-utility-sort__select-container">             
+              
+                      <select style="width:100%; max-width: 150px;" class="c-results-utility-sort__select js-select-width" id="dropdownSortByTop" onchange="javascript:ajaxSortSearchResults('Top');" style="width: auto">
+                  
+                      <option value="RELEVANCE" selected>Relevance</option>
+                  
+                      <option value="MP">Most popular</option>
+                  
+                      <option value="AU">Author</option>
+                  
+                      <option value="TI">Title</option>
+                  
+                      <option value="CALL">Call Number</option>
+                  
+                      <option value="PD">Publication date</option>
+                  
+                      <option value="AU_TI">Author, then Title</option>
+                  
+                      <option value="AU_PD">Author, then Publication date</option>
+                  
+                      <option value="TI_AU">Title, then Author</option>
+                  
+                      <option value="TI_PD">Title, then Publication date</option>
+                  
+                      <option value="TI_TOM">Title, then Format</option>
+                  
+                      <option value="PD_AU">Publication date, then Author</option>
+                  
+                      <option value="PD_TI">Publication date, then Title</option>
+                  
+                      <option value="CALL_AU">Call number, then Author</option>
+                  
+                      <option value="CALL_TI">Call number, then Title</option>
+                  
+                      <option value="CALL_PD">Call number, then Publication Date</option>
+                  
+                      </select>
+                   
+            </div>
+          </div>
+        
+
+        <div class="c-results-utility-narrow" style="display: block;" data-show-at-load="">
+          <div class="c-accordion c-accordion--results-utility" id="narrow-container" role="tablist" aria-multiselectable="true">
+            <div class="c-accordion__panel" id="c-accordion__panel-narrow">
+              <div class="c-accordion__heading" role="tab">
+                <h5 class="c-accordion__title">
+                  <a class="c-results-utility-narrow__link collapsed " role="button" href="javascript:showModalBasic('https://catalog.onlib.org/polaris/search/components/ajaxNarrowYourSearch.aspx', 'Narrow your search')">                   
+                    <span class="c-results-utility-narrow__narrow-label">Narrow</span>
+                    <span class="c-results-utility-narrow__narrowed-label">Narrowed</span>
+                  </a>
+                </h5>
+              </div>
+            </div>
+          </div>
+        </div>
+
+    </div>
+  
+                 
+
+
+  <div class="c-results-utility__container c-results-utility__container--pagination c-results-utility__container--last">
+    <div class="c-results-utility-full-pagination">
+        
+    </div>
+  </div>
+ 
+
+</div>
+
+
+
+
+
+
+
+<div id="searchResultsDIV">
+   
+        <div class="search__position">
+            <a id="__pos-1" href="#" aria-hidden="true" aria-label="Search Result"></a> 
+        </div>        
+        <div class="content-module content-module--search-result">  
+            <div class="content-container c-title-detail__title-display">
+                <div class="c-title-detail c-title-detail--initial-two-col">
+                    <div class="c-title-detail__container ">
+                        <div class="c-title-detail-media__container c-title-detail-media__container--no-border">
+                            <div class="c-title-detail__image-container">
+                                <div id="srcp_1" class="hover__container" width="1%" align="center" valign="top">
+                                    <img id="hover_image_1" class='c-title-detail__thumbnail hover__thumbnail' src="https://secure.syndetics.com/index.aspx?isbn=9780593135204/SC.GIF&client=onondagacplb&upc=&oclc=1149223512" alt="Project Hail Mary : a novel" data-position="1" data-isRBdigital="False">
+                                </div>
+                            </div>
+                            <div class="c-title-detail-meta">
+                                <div class="c-title-detail-formats__list">
+                                    
+                                    
+                                    
+                                    
+                                        <a href="javascript:showModalBasic('https://catalog.onlib.org/polaris/search/components/ajaxMARC.aspx?pos=1')">                 
+                                            <img class="c-title-detail-formats__img" src="https://catalog.onlib.org/polaris/themes/shared/formats/formatid01.gif" alt="Book" title="Book" border="0"/>
+                                        </a>
+                                    
+                                    
+                                                                    
+                                </div>                        
+                            </div>
+
+                            
+                                                       
+                                <div class="c-title-detail__3rd-party c-title-detail__pub-year">2021</div>
+                            
+                            
+                            
+                                <div class="c-title-detail__3rd-party">
+
+                                    
+                                    
+                                        <div class="gbs-preview-div c-title-detail__3rd-party-item--google-preview" id="gbs_ISBN:9780593135204_1" >
+                                            <a class="gbs-preview-link" href="javascript:showModalBasicWithIframe('https://catalog.onlib.org/polaris/search/components/ajaxGooglePreview.aspx?isbn=ISBN:9780593135204','', true)">
+                                                <img src="https://catalog.onlib.org/polaris/themes/shared/gbs_preview_button.gif" title="Google Books Preview" alt="Google Books Preview" border="0" />
+                                            </a>
+                                        </div>
+                                    
+                            </div>
+                            
+                        </div>
+                        <div class="c-title-detail-info__container">
+                            <div class="c-title-detail-info-main__container">
+                                <div class="c-title-detail-info__result-num">
+                                    
+                                    
+                                </div>
+                            </div>
+                            <div class="c-title-detail-info-secondary__container " id="plres_1"  >
+				                <table cellpadding="0" cellspacing="0" width="100%" border="0">
+					                <tr class="nsm-brief-primary-zone">
+	<td width="100%"><table width="100%" cellpadding="5" cellspacing="0">
+		<tr valign="top">
+			<td width="1%" align="right" style="padding-left: 0; padding-right: 0;">1.</td><td style="align: left; width: 100%; valign: top; margin-top: 5px;"><div class="nsm-brief-primary-title-group">
+				<a class="nsm-brief-action-link" href="https://catalog.onlib.org/polaris/search/title.aspx?ctx=1.1033.0.0.6&amp;pos=1&amp;cn=2393518"><span class="nsm-short-item nsm-e135">Project Hail Mary : a novel</span></a>
+			</div><div class="nsm-brief-primary-author-group">
+				by <span class="nsm-short-item nsm-e118"><a class="nsm-browse-link" href="../search/browse.aspx?ctx=1.1033.0.0.6&amp;type=Browse&amp;by=AU&amp;term=Weir%2c+Andy%2c&amp;page=0"><span class="nsm-browse-text">Weir, Andy,</span> author.</a></span>
+			</div></td><td nowrap="" width="1%" style="valign: top; text-align: right;"></td>
+		</tr>
+	</table></td>
+</tr><tr class="nsm-brief-secondary-zone">
+	<td></td>
+</tr><tr class="nsm-brief-secondary-zone">
+	<td><div class="nsm-brief-standard-group">
+		<span class="nsm-brief-label nsm-e102">Publisher, Date: </span><span class="nsm-short-item nsm-e102">New York : Ballantine Books, [2021]</span>
+	</div></td>
+</tr><tr class="nsm-brief-secondary-zone">
+	<td><div class="nsm-brief-standard-group">
+		<span class="nsm-brief-label nsm-e103">Description: </span><span class="nsm-short-item nsm-e103">476 pages</span>
+	</div><div class="nsm-brief-standard-group">
+		<span class="nsm-brief-label nsm-e105">Edition: </span><span class="nsm-short-item nsm-e105">First edition.</span>
+	</div><div class="nsm-brief-standard-group">
+		<span class="nsm-brief-label nsm-e106">ISBN: </span><span class="nsm-short-item nsm-e106">9780593135204</span>
+	</div></td>
+</tr><tr class="nsm-brief-secondary-zone">
+	<td><div class="nsm-brief-standard-group">
+		<span class="nsm-brief-label nsm-e31">Local Availability: </span><span class="nsm-short-item nsm-e"><span class="nsm-brief-inline-subzone">0 (of 29)</span></span>
+	</div><div class="nsm-brief-standard-group">
+		<span class="nsm-brief-label nsm-e7">System Availability: </span><span class="nsm-short-item nsm-e7">29</span>
+	</div></td>
+</tr>
+                                    
+    				                <tr>
+						                <td colspan=2>
+                                            
+                                            
+                                            
+						                </td>
+					                </tr>
+				                </table>
+                                
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div class="c-title-detail-actions__container">
+                        <ul id="c-title-detail__button-list-" class="c-title-detail-actions__list" data-item-pos="1"  data-item-page="0">
+                             
+                            
+                                   
+                           
+                            
+                                   
+
+                            
+                                   
+
+                            
+                            
+                            <li class="c-title-detail-actions__item button-brief-availability" role="presentation">
+                                <a class="c-title-detail-actions__btn" id="buttonAvailability_1"
+                                    href="javascript:showModalBasicWithIframe('https://catalog.onlib.org/polaris/search/components/ajaxavailability.aspx?fp=1&level=local&morelink=0&pos=1&bibid=2393518&displayAeonOnly=0', '', false, false, false, 'Availability')">
+                                    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                                        Availability  
+				                </a>
+                            </li>
+				                   
+ 
+                            
+                            <li class="c-title-detail-actions__item button-brief-fulldisplay" role="presentation">
+					            <a class="c-title-detail-actions__btn" href="https://catalog.onlib.org/polaris/search/title.aspx?ctx=1.1033.0.0.6&pos=1&cn=2393518">
+                                    <span class="glyphicon glyphicon-tasks"></span>
+                                    Full Display
+					            </a>
+                            </li>
+            
+                            
+                            
+                            <li class="c-title-detail-actions__item button-brief-request" role="presentation">
+                            
+
+                                    <a class="c-title-detail-actions__btn" href="https://catalog.onlib.org/polaris/Search/request.aspx?pos=1&new=1">
+                                        <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>
+                                        Place Request
+                                    </a>                        
+                            
+                            </li>
+                            
+                            
+                            
+                           
+                       </ul>
+                       <div class="c-title-detail-actions__add-to-my-list dropdown--scroll-into-view">
+                           
+                           <span id=addtolist_1 ><a class="c-add-to-my-list" href="javascript:AddToList(156, 1, '2393518', 0)">Add to My List</a>&nbsp;&nbsp;</span>
+                           
+                       </div>
+                    </div>
+                </div>
+            </div>
+            <hr />
+        </div> 
+	   
+        <div class="search__position">
+            <a id="__pos-2" href="#" aria-hidden="true" aria-label="Search Result"></a> 
+        </div>        
+        <div class="content-module content-module--search-result">  
+            <div class="content-container c-title-detail__title-display">
+                <div class="c-title-detail c-title-detail--initial-two-col">
+                    <div class="c-title-detail__container ">
+                        <div class="c-title-detail-media__container c-title-detail-media__container--no-border">
+                            <div class="c-title-detail__image-container">
+                                <div id="srcp_2" class="hover__container" width="1%" align="center" valign="top">
+                                    <img id="hover_image_2" class='c-title-detail__thumbnail hover__thumbnail' src="https://img1.od-cdn.com/ImageType-200/0111-1/{C122A37F-F984-4062-8F35-1072A99305A0}Img200.jpg" alt="Project Hail Mary" data-position="2" data-isRBdigital="False">
+                                </div>
+                            </div>
+                            <div class="c-title-detail-meta">
+                                <div class="c-title-detail-formats__list">
+                                    
+                                    
+                                        <img class="c-title-detail-formats__img" src="https://catalog.onlib.org/polaris/themes/shared/overdrive.jpg" border="0" alt="OverDrive Inc." title="OverDrive Inc." />
+                                    
+                                    
+                                    
+                                        <a href="javascript:showModalBasic('https://catalog.onlib.org/polaris/search/components/ajaxMARC.aspx?pos=2')">                 
+                                            <img class="c-title-detail-formats__img" src="https://catalog.onlib.org/polaris/themes/shared/formats/formatid36.gif" alt="Ebook" title="Ebook" border="0"/>
+                                        </a>
+                                    
+                                    
+                                                                    
+                                </div>                        
+                            </div>
+
+                            
+                                                       
+                                <div class="c-title-detail__3rd-party c-title-detail__pub-year">2021</div>
+                            
+                            
+                            
+                                <div class="c-title-detail__3rd-party">
+
+                                    
+                                    
+                                        <div class="gbs-preview-div c-title-detail__3rd-party-item--google-preview" id="gbs_ISBN:9780593135211_2" >
+                                            <a class="gbs-preview-link" href="javascript:showModalBasicWithIframe('https://catalog.onlib.org/polaris/search/components/ajaxGooglePreview.aspx?isbn=ISBN:9780593135211','', true)">
+                                                <img src="https://catalog.onlib.org/polaris/themes/shared/gbs_preview_button.gif" title="Google Books Preview" alt="Google Books Preview" border="0" />
+                                            </a>
+                                        </div>
+                                    
+                                        <div id="econtent-preview-vendor-div-C122A37F-F984-4062-8F35-1072A99305A0" style="display:none;">
+                                            <a id="econtent-preview-vendor-C122A37F-F984-4062-8F35-1072A99305A0" target="_blank" class="od-preview-link" href="" >
+                                                <img src="https://catalog.onlib.org/polaris/themes/shared/od_preview_button.gif" title="OverDrive Sample" alt="OverDrive Sample" border="0" />
+                                            </a>
+                                        </div>
+                                    
+                            </div>
+                            
+                        </div>
+                        <div class="c-title-detail-info__container">
+                            <div class="c-title-detail-info-main__container">
+                                <div class="c-title-detail-info__result-num">
+                                    
+                                    
+                                </div>
+                            </div>
+                            <div class="c-title-detail-info-secondary__container " id="plres_C122A37F-F984-4062-8F35-1072A99305A0"  >
+				                <table cellpadding="0" cellspacing="0" width="100%" border="0">
+					                <tr class="nsm-brief-primary-zone">
+	<td width="100%"><table width="100%" cellpadding="5" cellspacing="0">
+		<tr valign="top">
+			<td width="1%" align="right" style="padding-left: 0; padding-right: 0;">2.</td><td style="align: left; width: 100%; valign: top; margin-top: 5px;"><div class="nsm-brief-primary-title-group">
+				<a class="nsm-brief-action-link" href="https://catalog.onlib.org/polaris/search/title.aspx?ctx=1.1033.0.0.6&amp;pos=2&amp;cn=2489756"><span class="nsm-short-item nsm-e135">Project Hail Mary</span></a>
+			</div><div class="nsm-brief-primary-author-group">
+				by <span class="nsm-short-item nsm-e118"><a class="nsm-browse-link" href="../search/browse.aspx?ctx=1.1033.0.0.6&amp;type=Browse&amp;by=AU&amp;term=Weir%2c+Andy&amp;page=0"><span class="nsm-browse-text">Weir, Andy</span></a></span>
+			</div></td><td nowrap="" width="1%" style="valign: top; text-align: right;"></td>
+		</tr>
+	</table></td>
+</tr><tr class="nsm-brief-secondary-zone">
+	<td></td>
+</tr><tr class="nsm-brief-secondary-zone">
+	<td><div class="nsm-brief-standard-group">
+		<span class="nsm-brief-label nsm-e230">System Details: </span><span class="nsm-short-item nsm-e230">Adobe EPUB eBook</span> â€” <span class="nsm-short-item nsm-e230">Kindle Book</span> â€” <span class="nsm-short-item nsm-e230">OverDrive Read</span>
+	</div><div class="nsm-brief-standard-group">
+		<span class="nsm-brief-label nsm-e102">Publisher, Date: </span><span class="nsm-short-item nsm-e102">[S.I.] : Random House Publishing Group, 2021.</span>
+	</div></td>
+</tr><tr class="nsm-brief-secondary-zone">
+	<td><div class="nsm-brief-standard-group">
+		<span class="nsm-brief-label nsm-e106">ISBN: </span><span class="nsm-short-item nsm-e106">9780593135211</span>
+	</div></td>
+</tr><tr class="nsm-brief-secondary-zone">
+	<td></td>
+</tr>
+                                    
+    				                <tr>
+						                <td colspan=2>
+                                            
+                                            
+                                            
+                                                <div class="nsm-brief-standard-group" id="econtent-status-vendor-actionC122A37F-F984-4062-8F35-1072A99305A01" >
+                                                </div>
+                                                <div class="nsm-brief-standard-group" id="econtent-status-vendor-actionC122A37F-F984-4062-8F35-1072A99305A02" >
+                                                </div>
+                                            
+						                </td>
+					                </tr>
+				                </table>
+                                
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div class="c-title-detail-actions__container">
+                        <ul id="c-title-detail__button-list-C122A37F-F984-4062-8F35-1072A99305A0" class="c-title-detail-actions__list" data-item-pos="2"  data-item-page="0">
+                             
+                            
+                                   
+                           
+                            
+                                   
+
+                            
+                                   
+
+                            
+                                   
+ 
+                            
+                            <li class="c-title-detail-actions__item button-brief-fulldisplay" role="presentation">
+					            <a class="c-title-detail-actions__btn" href="https://catalog.onlib.org/polaris/search/title.aspx?ctx=1.1033.0.0.6&pos=2&cn=2489756">
+                                    <span class="glyphicon glyphicon-tasks"></span>
+                                    Full Display
+					            </a>
+                            </li>
+            
+                            
+                            
+                            
+                            
+                           
+                           <li class="c-title-detail-actions__item button-brief-econtent" role="presentation">
+                               
+                               
+                                       <div class="OverdriveLinksWrapper" id="OverdriveLinksWrapperId-C122A37F-F984-4062-8F35-1072A99305A0" data-item-id="C122A37F-F984-4062-8F35-1072A99305A0">
+                                          
+                                              <div class="overdrive-results-title-action-button overdrive-results-title-action-button-primary" id='overdrive-link-vendor-action2"'>
+                                                  <a class="c-title-detail-actions__btn overdrive-link-nofancy C122A37F-F984-4062-8F35-1072A99305A0" id="overdrive-anchor-tag-C122A37F-F984-4062-8F35-1072A99305A0" data-item-pos="2"  data-item-page="0"
+                                                      href="https://catalog.onlib.org/polaris/logon.aspx?src=https%3a%2f%2fcatalog.onlib.org%2fpolaris%2fSearch%2fdispatch.aspx%3fctx%3d1.1033.0.0.6%26action%3d4%26page%3d0%26pos%3d2" data-link="https://catalog.onlib.org/polaris/logon.aspx?src=https%3a%2f%2fcatalog.onlib.org%2fpolaris%2fSearch%2fdispatch.aspx%3fctx%3d1.1033.0.0.6%26action%3d4%26page%3d0%26pos%3d2" onclick='javascript:OverdriveLinkClicked("C122A37F-F984-4062-8F35-1072A99305A0","You must be logged in to your account to access this resource. Click OK to log in, or cancel to continue searching.",event)'>
+                                                      <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                                                     Place Hold
+				                                  </a>
+                                              </div>
+                                          
+                                      </div>               
+                                   
+				           </li>
+                           
+                       </ul>
+                       <div class="c-title-detail-actions__add-to-my-list dropdown--scroll-into-view">
+                           
+                           <span id=addtolist_2 ><a class="c-add-to-my-list" href="javascript:AddToList(156, 2, '2489756', 0)">Add to My List</a>&nbsp;&nbsp;</span>
+                           
+                       </div>
+                    </div>
+                </div>
+            </div>
+            <hr />
+        </div> 
+	   
+        <div class="search__position">
+            <a id="__pos-3" href="#" aria-hidden="true" aria-label="Search Result"></a> 
+        </div>        
+        <div class="content-module content-module--search-result">  
+            <div class="content-container c-title-detail__title-display">
+                <div class="c-title-detail c-title-detail--initial-two-col">
+                    <div class="c-title-detail__container ">
+                        <div class="c-title-detail-media__container c-title-detail-media__container--no-border">
+                            <div class="c-title-detail__image-container">
+                                <div id="srcp_3" class="hover__container" width="1%" align="center" valign="top">
+                                    <img id="hover_image_3" class='c-title-detail__thumbnail hover__thumbnail' src="https://secure.syndetics.com/index.aspx?isbn=9780593135228/SC.GIF&client=onondagacplb&upc=&oclc=1336702821" alt="Project Hail Mary : a novel" data-position="3" data-isRBdigital="False">
+                                </div>
+                            </div>
+                            <div class="c-title-detail-meta">
+                                <div class="c-title-detail-formats__list">
+                                    
+                                    
+                                    
+                                    
+                                        <a href="javascript:showModalBasic('https://catalog.onlib.org/polaris/search/components/ajaxMARC.aspx?pos=3')">                 
+                                            <img class="c-title-detail-formats__img" src="https://catalog.onlib.org/polaris/themes/shared/formats/formatid01.gif" alt="Book" title="Book" border="0"/>
+                                        </a>
+                                    
+                                    
+                                                                    
+                                </div>                        
+                            </div>
+
+                            
+                                                       
+                                <div class="c-title-detail__3rd-party c-title-detail__pub-year">2022</div>
+                            
+                            
+                            
+                                <div class="c-title-detail__3rd-party">
+
+                                    
+                                    
+                                        <div class="gbs-preview-div c-title-detail__3rd-party-item--google-preview" id="gbs_ISBN:9780593135228_3" >
+                                            <a class="gbs-preview-link" href="javascript:showModalBasicWithIframe('https://catalog.onlib.org/polaris/search/components/ajaxGooglePreview.aspx?isbn=ISBN:9780593135228','', true)">
+                                                <img src="https://catalog.onlib.org/polaris/themes/shared/gbs_preview_button.gif" title="Google Books Preview" alt="Google Books Preview" border="0" />
+                                            </a>
+                                        </div>
+                                    
+                            </div>
+                            
+                        </div>
+                        <div class="c-title-detail-info__container">
+                            <div class="c-title-detail-info-main__container">
+                                <div class="c-title-detail-info__result-num">
+                                    
+                                    
+                                </div>
+                            </div>
+                            <div class="c-title-detail-info-secondary__container " id="plres_3"  >
+				                <table cellpadding="0" cellspacing="0" width="100%" border="0">
+					                <tr class="nsm-brief-primary-zone">
+	<td width="100%"><table width="100%" cellpadding="5" cellspacing="0">
+		<tr valign="top">
+			<td width="1%" align="right" style="padding-left: 0; padding-right: 0;">3.</td><td style="align: left; width: 100%; valign: top; margin-top: 5px;"><div class="nsm-brief-primary-title-group">
+				<a class="nsm-brief-action-link" href="https://catalog.onlib.org/polaris/search/title.aspx?ctx=1.1033.0.0.6&amp;pos=3&amp;cn=3589954"><span class="nsm-short-item nsm-e135">Project Hail Mary : a novel</span></a>
+			</div><div class="nsm-brief-primary-author-group">
+				by <span class="nsm-short-item nsm-e118"><a class="nsm-browse-link" href="../search/browse.aspx?ctx=1.1033.0.0.6&amp;type=Browse&amp;by=AU&amp;term=Weir%2c+Andy%2c&amp;page=0"><span class="nsm-browse-text">Weir, Andy,</span> author.</a></span>
+			</div></td><td nowrap="" width="1%" style="valign: top; text-align: right;"></td>
+		</tr>
+	</table></td>
+</tr><tr class="nsm-brief-secondary-zone">
+	<td></td>
+</tr><tr class="nsm-brief-secondary-zone">
+	<td><div class="nsm-brief-standard-group">
+		<span class="nsm-brief-label nsm-e102">Publisher, Date: </span><span class="nsm-short-item nsm-e102">New York : Vallantine Books, 2022.</span>
+	</div></td>
+</tr><tr class="nsm-brief-secondary-zone">
+	<td><div class="nsm-brief-standard-group">
+		<span class="nsm-brief-label nsm-e103">Description: </span><span class="nsm-short-item nsm-e103">476 pages</span>
+	</div><div class="nsm-brief-standard-group">
+		<span class="nsm-brief-label nsm-e106">ISBN: </span><span class="nsm-short-item nsm-e106">9780593135228</span>
+	</div></td>
+</tr><tr class="nsm-brief-secondary-zone">
+	<td><div class="nsm-brief-standard-group">
+		<span class="nsm-brief-label nsm-e31">Local Availability: </span><span class="nsm-short-item nsm-e"><span class="nsm-brief-inline-subzone">0 (of 6)</span></span>
+	</div><div class="nsm-brief-standard-group">
+		<span class="nsm-brief-label nsm-e7">System Availability: </span><span class="nsm-short-item nsm-e7">6</span>
+	</div></td>
+</tr>
+                                    
+    				                <tr>
+						                <td colspan=2>
+                                            
+                                            
+                                            
+						                </td>
+					                </tr>
+				                </table>
+                                
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div class="c-title-detail-actions__container">
+                        <ul id="c-title-detail__button-list-" class="c-title-detail-actions__list" data-item-pos="3"  data-item-page="0">
+                             
+                            
+                                   
+                           
+                            
+                                   
+
+                            
+                                   
+
+                            
+                            
+                            <li class="c-title-detail-actions__item button-brief-availability" role="presentation">
+                                <a class="c-title-detail-actions__btn" id="buttonAvailability_3"
+                                    href="javascript:showModalBasicWithIframe('https://catalog.onlib.org/polaris/search/components/ajaxavailability.aspx?fp=1&level=local&morelink=0&pos=3&bibid=3589954&displayAeonOnly=0', '', false, false, false, 'Availability')">
+                                    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                                        Availability  
+				                </a>
+                            </li>
+				                   
+ 
+                            
+                            <li class="c-title-detail-actions__item button-brief-fulldisplay" role="presentation">
+					            <a class="c-title-detail-actions__btn" href="https://catalog.onlib.org/polaris/search/title.aspx?ctx=1.1033.0.0.6&pos=3&cn=3589954">
+                                    <span class="glyphicon glyphicon-tasks"></span>
+                                    Full Display
+					            </a>
+                            </li>
+            
+                            
+                            
+                            <li class="c-title-detail-actions__item button-brief-request" role="presentation">
+                            
+
+                                    <a class="c-title-detail-actions__btn" href="https://catalog.onlib.org/polaris/Search/request.aspx?pos=3&new=1">
+                                        <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>
+                                        Place Request
+                                    </a>                        
+                            
+                            </li>
+                            
+                            
+                            
+                           
+                       </ul>
+                       <div class="c-title-detail-actions__add-to-my-list dropdown--scroll-into-view">
+                           
+                           <span id=addtolist_3 ><a class="c-add-to-my-list" href="javascript:AddToList(156, 3, '3589954', 0)">Add to My List</a>&nbsp;&nbsp;</span>
+                           
+                       </div>
+                    </div>
+                </div>
+            </div>
+            <hr />
+        </div> 
+	
+</div>
+
+
+
+    <script>
+
+        $('#pagination-results-bottom').twbsPagination({
+            totalPages: 1,
+            visiblePages: 4,
+            startPage: 1,
+            prev: '<span aria-label="Previous page">&lt;</span>',
+            next: '<span aria-label="Next page">&gt;</span>',
+            first: '<span aria-label="First page">&laquo;</span>',
+            last: '<span aria-label="Last page">&raquo;</span>',
+            pageClass: 'navigation-button',
+            onPageClick: function (event, page) {
+                if (page != 1) {
+                    ajaxLoadResultsPage(page, 1, null, 0);
+                }
+            }
+        });
+
+    </script>
+
+
+<div class='c-results-utility c-results-utility--partial'>
+  <div class="c-results-utility__container c-results-utility__container--result-count">
+    <div class="c-results-utility-result-count">
+        1
+        -
+        3
+        of
+        3
+    </div>
+    <div class="c-results-utility-per-page form-inline">  
+      <div class="c-results-utility-per-page__select-container select-styled">    
+        <select aria-label="Results per page dropdown" class="c-results-utility-per-page__select" id="dropdownResultsPerPageBottom" onchange="javascript:ajaxLoadResultsPage(1, 1, 'Bottom', 0);">
+           <option value="10" selected>10</option>
+           <option value="20">20</option>
+           <option value="30">30</option>
+           <option value="50">50</option>
+           <option value="100">100</option>
+        </select>
+      </div>
+      <span aria-label="per page"  class="c-results-utility-per-page__label">per page</span>
+    </div>
+  </div>
+
+  
+                 
+
+
+  <div class="c-results-utility__container c-results-utility__container--pagination c-results-utility__container--last">
+    <div class="c-results-utility-full-pagination">
+        
+            <ul id="pagination-results-bottom" class="pagination-sm" style="margin: 0px;"></ul>
+        
+    </div>
+  </div>
+ 
+
+</div>
+
+
+
+
+
+    <script src="https://books.google.com/books?jscmd=viewapi&amp;bibkeys=ISBN:9780593135204,ISBN:9780593135211,ISBN:9780593135228,&amp;callback=processDynamicLinksResponse"></script>
+
+
+
+
+<div id="complete"></div>
+
+<script type="text/javascript" defer="defer">
+
+    $(document).ready(function ($) {
+        GetCloudLibraryPrivilegesWrapper("", false);
+    });
+
+    $(document).ready(function ($) {
+        GetAxis360PrivilegesWrapper("", false);
+    });
+    $(document).ready(function ($) {
+        GetOverdrivePrivilegesWrapper("", false);
+    });
+
+    $(document).ready(function ($) {
+        GetRBdigitalPrivilegesWrapper("", false);
+
+        var isPresent = document.getElementById('IsRBdigitalLicensedID');
+        if (isPresent == null) {
+            RemoveAvailabiltyForNotLicensed();
+        }
+    });
+
+    $(document).ready(function ($) {
+        GetRestrictedWrapper();
+    });
+   
+    initializeBibliographicHover();
+
+
+
+</script>
