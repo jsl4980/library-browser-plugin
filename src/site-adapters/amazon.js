@@ -1,7 +1,7 @@
 (function registerAmazonAdapter(globalScope) {
   const root = globalScope || self;
   const app = root.LibraryBrowser;
-  const { normalizeWhitespace } = app.normalize;
+  const { normalizeWhitespace, primaryTitleBeforeSubtitle } = app.normalize;
 
   function textFromSelector(selectors) {
     for (const selector of selectors) {
@@ -42,11 +42,13 @@
       return /amazon\.com/i.test(url.hostname) && /\/(dp|gp\/product)\//i.test(url.href);
     },
     extract() {
-      const title = textFromSelector([
-        "#productTitle",
-        "#ebooksProductTitle",
-        "#title"
-      ]);
+      const title = primaryTitleBeforeSubtitle(
+        textFromSelector([
+          "#productTitle",
+          "#ebooksProductTitle",
+          "#title"
+        ])
+      );
       const author = textFromSelector([
         ".author .a-link-normal",
         "#bylineInfo .author a",

@@ -104,11 +104,29 @@
       "requiredInPr": true
     },
     {
+      "id": "TC-US1-GOODREADS-SUBTITLE-TITLE",
+      "stories": ["US1"],
+      "kind": "page",
+      "source": "fixture",
+      "fixtureId": "goodreads-subtitle-title",
+      "expectedStatus": "available_now",
+      "requiredInPr": true
+    },
+    {
       "id": "TC-US2-AMAZON-RENDER",
       "stories": ["US2", "US4"],
       "kind": "page",
       "source": "fixture",
       "fixtureId": "amazon-render",
+      "expectedStatus": "hold_available",
+      "requiredInPr": true
+    },
+    {
+      "id": "TC-US2-AMAZON-SUBTITLE-TITLE",
+      "stories": ["US2"],
+      "kind": "page",
+      "source": "fixture",
+      "fixtureId": "amazon-subtitle-title",
       "expectedStatus": "hold_available",
       "requiredInPr": true
     },

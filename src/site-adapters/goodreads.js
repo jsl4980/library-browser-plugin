@@ -1,7 +1,7 @@
 (function registerGoodreadsAdapter(globalScope) {
   const root = globalScope || self;
   const app = root.LibraryBrowser;
-  const { normalizeWhitespace } = app.normalize;
+  const { normalizeWhitespace, primaryTitleBeforeSubtitle } = app.normalize;
 
   function getText(selectors) {
     for (const selector of selectors) {
@@ -46,10 +46,12 @@
       return /goodreads\.com\/book\//i.test(url.href);
     },
     extract() {
-      const title = getText([
-        "[data-testid='bookTitle']",
-        "h1.Text.Text__title1"
-      ]);
+      const title = primaryTitleBeforeSubtitle(
+        getText([
+          "[data-testid='bookTitle']",
+          "h1.Text.Text__title1"
+        ])
+      );
       const author = getText([
         "[data-testid='name']",
         ".ContributorLink__name",

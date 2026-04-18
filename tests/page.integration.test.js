@@ -37,6 +37,31 @@ test("TC-US1-GOODREADS-RENDER renders a Goodreads availability card", async () =
   assert.equal(harness.sentMessages[0].book.isbn13, "9781234567897");
 });
 
+test("TC-US1-GOODREADS-SUBTITLE-TITLE strips retailer subtitle before lookup", async () => {
+  const testCase = pageCases.get("TC-US1-GOODREADS-SUBTITLE-TITLE");
+  const harness = createPageHarness({
+    html: loadPageFixture("goodreads-book-subtitle.html"),
+    url: "https://www.goodreads.com/book/show/40121378-atomic-habits",
+    runtimeResult: {
+      status: "available_now",
+      summary: "Available now at OCPL",
+      detail: "The catalog page indicates at least one available copy.",
+      actionUrl: "https://catalog.onlib.org/polaris/view.aspx?isbn=9780735211309",
+      libraryName: "Onondaga County Public Library System"
+    }
+  });
+
+  await new Promise((resolve) => setImmediate(resolve));
+  const card = harness.getCard();
+
+  assertTraceability({ stories, testCase });
+  assert.ok(card, "Expected a library card to be inserted");
+  assert.equal(card.dataset.status, testCase.expectedStatus);
+  assert.equal(harness.sentMessages[0].book.title, "Atomic Habits");
+  assert.equal(harness.sentMessages[0].book.author, "James Clear");
+  assert.equal(harness.sentMessages[0].book.isbn13, "9780735211309");
+});
+
 test("TC-US2-AMAZON-RENDER renders an Amazon availability card", async () => {
   const testCase = pageCases.get("TC-US2-AMAZON-RENDER");
   const harness = createPageHarness({
@@ -60,6 +85,32 @@ test("TC-US2-AMAZON-RENDER renders an Amazon availability card", async () => {
   assert.equal(harness.sentMessages[0].book.title, "Waiting for Circulation");
   assert.equal(harness.sentMessages[0].book.author, "Nina Queue");
   assert.equal(harness.sentMessages[0].book.isbn13, "9781111111111");
+});
+
+test("TC-US2-AMAZON-SUBTITLE-TITLE strips retailer subtitle before lookup", async () => {
+  const testCase = pageCases.get("TC-US2-AMAZON-SUBTITLE-TITLE");
+  const harness = createPageHarness({
+    html: loadPageFixture("amazon-book-subtitle.html"),
+    url: "https://www.amazon.com/gp/product/B07D23CFGR",
+    runtimeResult: {
+      status: "hold_available",
+      summary: "Found at OCPL",
+      detail: "The book appears in the catalog and may require a hold or sign-in for copy details.",
+      actionUrl: "https://catalog.onlib.org/polaris/view.aspx?isbn=0735211308",
+      libraryName: "Onondaga County Public Library System"
+    }
+  });
+
+  await new Promise((resolve) => setImmediate(resolve));
+  const card = harness.getCard();
+
+  assertTraceability({ stories, testCase });
+  assert.ok(card, "Expected a library card to be inserted");
+  assert.equal(card.dataset.status, testCase.expectedStatus);
+  assert.equal(harness.sentMessages[0].book.title, "Atomic Habits");
+  assert.equal(harness.sentMessages[0].book.author, "James Clear");
+  assert.equal(harness.sentMessages[0].book.isbn10, "0735211308");
+  assert.equal(harness.sentMessages[0].book.isbn13, "");
 });
 
 test("TC-US4-CTA-LINK points to the OCPL catalog", async () => {

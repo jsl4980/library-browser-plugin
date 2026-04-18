@@ -21,10 +21,26 @@
     return encodeURIComponent(normalizeWhitespace(value));
   }
 
+  /** Main segment before "Title: Subtitle" (colon + space); avoids "10:04"-style colons. */
+  function primaryTitleBeforeSubtitle(value) {
+    const t = normalizeWhitespace(value);
+    const m = t.match(/^(.+?):\s+(.+)$/);
+    if (!m) {
+      return t;
+    }
+    const main = m[1].trim();
+    const sub = m[2].trim();
+    if (!main || !sub) {
+      return t;
+    }
+    return main;
+  }
+
   app.normalize = {
     normalizeWhitespace,
     normalizeText,
     normalizeIsbn,
-    encodeTemplateValue
+    encodeTemplateValue,
+    primaryTitleBeforeSubtitle
   };
 })(typeof globalThis !== "undefined" ? globalThis : self);
