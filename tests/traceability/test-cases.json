@@ -131,6 +131,15 @@
       "requiredInPr": true
     },
     {
+      "id": "TC-US2-AMAZON-LEGACY-ASIN-URL",
+      "stories": ["US2", "US6"],
+      "kind": "page",
+      "source": "fixture",
+      "fixtureId": "amazon-legacy-asin-url",
+      "expectedStatus": "hold_available",
+      "requiredInPr": true
+    },
+    {
       "id": "TC-US2-AMAZON-KINDLE-BOOK",
       "stories": ["US2", "US6"],
       "kind": "page",

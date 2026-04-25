@@ -193,6 +193,30 @@ async function main() {
     assert.equal(harness.sentMessages[0].book.isbn13, "");
   });
 
+  await run("TC-US2-AMAZON-LEGACY-ASIN-URL renders on legacy Amazon ASIN URLs", async () => {
+    const testCase = pageCases.get("TC-US2-AMAZON-LEGACY-ASIN-URL");
+    const harness = createPageHarness({
+      html: loadPageFixture("amazon-book.html"),
+      url: "https://www.amazon.com/exec/obidos/ASIN/0201657880",
+      runtimeResult: {
+        status: "hold_available",
+        summary: "Found at OCPL",
+        detail: "The book appears in the catalog and may require a hold or sign-in for copy details.",
+        actionUrl: "https://catalog.onlib.org/polaris/view.aspx?isbn=9781111111111",
+        libraryName: "Onondaga County Public Library System"
+      }
+    });
+
+    await new Promise((resolve) => setImmediate(resolve));
+    const card = harness.getCard();
+
+    assertTraceability({ stories, testCase });
+    assert.ok(card, "Expected a library card to be inserted");
+    assert.equal(card.dataset.status, testCase.expectedStatus);
+    assert.equal(harness.sentMessages[0].book.title, "Waiting for Circulation");
+    assert.equal(harness.sentMessages[0].book.sourceUrl, "https://www.amazon.com/exec/obidos/ASIN/0201657880");
+  });
+
   await run("TC-US2-AMAZON-KINDLE-BOOK detects Amazon Kindle books without ISBN", async () => {
     const testCase = pageCases.get("TC-US2-AMAZON-KINDLE-BOOK");
     const harness = createPageHarness({

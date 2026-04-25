@@ -137,7 +137,7 @@
   const adapter = {
     id: "amazon",
     matches(url) {
-      return /amazon\.com/i.test(url.hostname) && /\/(dp|gp\/product)\//i.test(url.href);
+      return /amazon\.com/i.test(url.hostname) && /\/(dp|gp\/product|exec\/obidos\/ASIN)\//i.test(url.href);
     },
     extract() {
       const title = primaryTitleBeforeSubtitle(
