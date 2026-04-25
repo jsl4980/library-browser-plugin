@@ -131,6 +131,24 @@
       "requiredInPr": true
     },
     {
+      "id": "TC-US2-AMAZON-KINDLE-BOOK",
+      "stories": ["US2", "US6"],
+      "kind": "page",
+      "source": "fixture",
+      "fixtureId": "amazon-kindle-book",
+      "expectedStatus": "found",
+      "requiredInPr": true
+    },
+    {
+      "id": "TC-US2-AMAZON-NON-BOOK-SKIP",
+      "stories": ["US2", "US6"],
+      "kind": "page",
+      "source": "fixture",
+      "fixtureId": "amazon-non-book",
+      "expectedStatus": "skipped",
+      "requiredInPr": true
+    },
+    {
       "id": "TC-US4-CTA-LINK",
       "stories": ["US4"],
       "kind": "page",

@@ -113,6 +113,52 @@ test("TC-US2-AMAZON-SUBTITLE-TITLE strips retailer subtitle before lookup", asyn
   assert.equal(harness.sentMessages[0].book.isbn13, "");
 });
 
+test("TC-US2-AMAZON-KINDLE-BOOK detects Amazon Kindle books without ISBN", async () => {
+  const testCase = pageCases.get("TC-US2-AMAZON-KINDLE-BOOK");
+  const harness = createPageHarness({
+    html: loadPageFixture("amazon-kindle-book.html"),
+    url: "https://www.amazon.com/dp/kindlebook",
+    runtimeResult: {
+      status: "found",
+      summary: "Found at OCPL",
+      detail: "The book appears in the OCPL catalog.",
+      actionUrl: "https://catalog.onlib.org/polaris/view.aspx?keyword=Digital%20Circulation%20Morgan%20Reader",
+      libraryName: "Onondaga County Public Library System"
+    }
+  });
+
+  await new Promise((resolve) => setImmediate(resolve));
+  const card = harness.getCard();
+
+  assertTraceability({ stories, testCase });
+  assert.ok(card, "Expected a library card to be inserted");
+  assert.equal(card.dataset.status, testCase.expectedStatus);
+  assert.equal(harness.sentMessages[0].book.title, "Digital Circulation");
+  assert.equal(harness.sentMessages[0].book.author, "Morgan Reader");
+  assert.equal(harness.sentMessages[0].book.isbn13, "");
+});
+
+test("TC-US2-AMAZON-NON-BOOK-SKIP skips Amazon products without book evidence", async () => {
+  const testCase = pageCases.get("TC-US2-AMAZON-NON-BOOK-SKIP");
+  const harness = createPageHarness({
+    html: loadPageFixture("amazon-non-book.html"),
+    url: "https://www.amazon.com/dp/nonbook",
+    runtimeResult: {
+      status: "found",
+      summary: "Unexpected lookup",
+      detail: "This result should not be rendered.",
+      actionUrl: "https://catalog.onlib.org/polaris/view.aspx?keyword=Everyday%20Stainless%20Water%20Bottle",
+      libraryName: "Onondaga County Public Library System"
+    }
+  });
+
+  await new Promise((resolve) => setImmediate(resolve));
+
+  assertTraceability({ stories, testCase });
+  assert.equal(harness.getCard(), null);
+  assert.equal(harness.sentMessages.length, 0);
+});
+
 test("TC-US4-CTA-LINK points to the OCPL catalog", async () => {
   const testCase = pageCases.get("TC-US4-CTA-LINK");
   const harness = createPageHarness({
