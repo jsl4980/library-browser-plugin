@@ -116,10 +116,13 @@
             type="checkbox"
             style="width: auto; margin-top: 4px"
           />
-          <span>Show lookup metadata summary on book pages (for testing). Also logs the same data to the browser console with the prefix <code>[Library Browser]</code>.</span>
+          <span>Show lookup metadata summary on book cards and list badges (for testing). Also logs to the console with the prefix <code>[Library Browser]</code>. Use <strong>Copy diagnostics</strong> on a card or <strong>Export support report</strong> below when reporting a problem.</span>
         </label>
 
         <button type="submit">Save settings</button>
+        <button type="button" id="export-support-report" style="margin-left: 10px; background: #556b4d">
+          Export support report
+        </button>
         <div id="status" aria-live="polite"></div>
       </form>
     </main>

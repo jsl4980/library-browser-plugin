@@ -4,7 +4,12 @@ const { loadOcplFixtures, loadTraceability } = require("./helpers/fixture-loader
 const { createConnectorHarness, assertTraceability } = require("./helpers/test-harness");
 
 const { stories, testCases } = loadTraceability();
-const connectorCases = testCases.filter((testCase) => testCase.kind === "connector" && testCase.source === "fixture");
+const connectorCases = testCases.filter(
+  (testCase) =>
+    testCase.kind === "connector" &&
+    testCase.source === "fixture" &&
+    !testCase.id.startsWith("TC-US10-")
+);
 const fixtures = new Map(loadOcplFixtures().map((fixture) => [fixture.id, fixture]));
 
 test("traceability registry covers all connector fixture tests", () => {
@@ -97,3 +102,80 @@ for (const testCase of connectorCases) {
     }
   });
 }
+
+test("TC-US10-KEYWORD-URL-CACHE reuses keyword catalog fetch for identical title/author", async () => {
+  const testCase = testCases.find((entry) => entry.id === "TC-US10-KEYWORD-URL-CACHE");
+  const fixture = fixtures.get(testCase.fixtureId);
+  const requests = [];
+  const harness = createConnectorHarness({
+    fetchImpl: async (url) => {
+      requests.push(url.toString());
+      return {
+        ok: true,
+        status: 200,
+        async text() {
+          return fixture.responseBody;
+        }
+      };
+    }
+  });
+
+  const book = harness.toBookMetadata(fixture.book);
+  const settings = {
+    libraryName: "Onondaga County Public Library System",
+    catalogBaseUrl: "https://catalog.onlib.org/polaris/"
+  };
+
+  const first = await harness.connector.lookup(book, settings, { includeDebug: true });
+  const second = await harness.connector.lookup(book, settings, { includeDebug: true });
+
+  assertTraceability({ stories, testCase });
+  assert.equal(first.status, testCase.expectedStatus);
+  assert.equal(second.status, testCase.expectedStatus);
+  assert.equal(requests.length, 1, "second lookup should reuse cached keyword page");
+  assert.equal(first.debug.catalog.tries[0].cacheHit, false);
+  assert.equal(second.debug.catalog.tries[0].cacheHit, true);
+});
+
+test("TC-US10-NO-CROSS-STRATEGY-ALIAS does not serve ISBN result for title/author-only book", async () => {
+  const testCase = testCases.find((entry) => entry.id === "TC-US10-NO-CROSS-STRATEGY-ALIAS");
+  const fixture = fixtures.get(testCase.fixtureId);
+  const requests = [];
+  const harness = createConnectorHarness({
+    fetchImpl: async (url) => {
+      requests.push(url.toString());
+      return {
+        ok: true,
+        status: 200,
+        url: url.toString(),
+        async text() {
+          return fixture.responseBody;
+        }
+      };
+    }
+  });
+
+  const settings = {
+    libraryName: "Onondaga County Public Library System",
+    catalogBaseUrl: "https://catalog.onlib.org/polaris/"
+  };
+
+  const isbnBook = harness.toBookMetadata(fixture.book);
+  const titleOnlyBook = harness.toBookMetadata({
+    title: fixture.book.title,
+    author: fixture.book.author,
+    isbn13: "",
+    isbn10: "",
+    sourceSite: "goodreads",
+    sourceUrl: fixture.book.sourceUrl
+  });
+
+  await harness.connector.lookup(isbnBook, settings, { includeDebug: true });
+  const titleResult = await harness.connector.lookup(titleOnlyBook, settings, { includeDebug: true });
+
+  assertTraceability({ stories, testCase });
+  assert.ok(titleResult.debug.catalog.tries.some((entry) => entry.kind === "related"));
+  assert.ok(titleResult.debug.catalog.tries.every((entry) => entry.kind !== "isbn"));
+  // Keyword URL may be a cache hit from the prior ISBN lookup's related leg — that is correct.
+  assert.equal(titleResult.debug.catalog.tries.find((entry) => entry.kind === "related").cacheHit, true);
+});

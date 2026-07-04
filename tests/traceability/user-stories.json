@@ -30,5 +30,13 @@
   "US8": {
     "title": "Metadata summary for testing and debugging",
     "description": "As a tester, I want to turn on an option that shows a summary of the metadata used for the library lookup (what was read from the book page and what was used to query the catalog) both in the inline card and in the browser console, so I can debug incorrect results and report them accurately."
+  },
+  "US9": {
+    "title": "Goodreads list and grid library badges",
+    "description": "As a Goodreads user browsing a list or grid of books, I want a small status badge on each cover so I can see library availability at a glance and open the info card for details."
+  },
+  "US10": {
+    "title": "Catalog request caching without strategy aliasing",
+    "description": "As a user, I want repeated identical catalog searches to reuse cached catalog pages, without treating ISBN and title/author results as interchangeable."
   }
 }

@@ -1,10 +1,10 @@
 (function registerBookMetadata(globalScope) {
   const root = globalScope || self;
   const app = root.LibraryBrowser;
-  const { normalizeWhitespace, normalizeIsbn, normalizeText } = app.normalize;
+  const { normalizeWhitespace, normalizeIsbn, normalizeText, cleanBookTitle } = app.normalize;
 
   function toBookMetadata(input) {
-    const title = normalizeWhitespace(input.title);
+    const title = cleanBookTitle(input.title);
     const author = normalizeWhitespace(input.author);
     const isbn13 = normalizeIsbn(input.isbn13);
     const isbn10 = normalizeIsbn(input.isbn10);
@@ -14,6 +14,7 @@
       author,
       isbn13,
       isbn10,
+      goodreadsId: normalizeWhitespace(input.goodreadsId || ""),
       normalizedTitle: normalizeText(title),
       normalizedAuthor: normalizeText(author),
       sourceSite: input.sourceSite,

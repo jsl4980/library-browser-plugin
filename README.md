@@ -1,18 +1,23 @@
 # Library Browser Plugin
 
-Library Browser Plugin is a Chrome extension scaffold that checks whether books you find on Goodreads or Amazon appear in the Onondaga County Public Library System catalog.
+Library Browser Plugin is a Chrome extension that checks whether books you find on Goodreads or Amazon appear in the Onondaga County Public Library System catalog.
 
-## Current status
+## Current status (v0.3.0)
 
-This is the first vertical slice:
+- **Goodreads book detail pages** — inline result card with library availability
+- **Goodreads list and grid pages** (shelves, Listopia, search, author pages, related-book carousels, and similar) — small status badges on covers (bottom-right)
+  - Green: available now
+  - Yellow: in catalog (hold or found)
+  - Red: not found
+  - Gray: lookup error or catalog setup needed
+  - Click a badge for the info card popup (catalog links work; close with outside click, Escape, or the badge again)
+- **Amazon book detail pages** — inline result card (same as before)
+- Extracts title, author, and ISBN when the page exposes them (list/grid rows use title/author only)
+- OCPL Polaris catalog lookup via ISBN and/or keyword search
+- Local caches (memory + `chrome.storage.local`) avoid repeating identical catalog requests; ISBN and title/author results are never treated as interchangeable
+- Options page: library name, catalog base URL, debug metadata toggle, **Export support report**
 
-- Detects Goodreads and Amazon book detail pages
-- Extracts title, author, and ISBN when possible
-- Shows an inline result card on the page
-- Uses the Onondaga County Public Library System Polaris catalog as the default lookup target
-- Performs a simple OCPL catalog lookup using direct Polaris ISBN and keyword searches
-
-The current OCPL connector can identify likely matches and attempts a basic availability inference from the Polaris results page. Exact copy-level availability may still need deeper Polaris-specific parsing.
+The OCPL connector identifies likely matches and infers availability from the Polaris results page, including per-format hints when present. Exact copy-level availability may still need deeper Polaris-specific parsing.
 
 ## Load the extension
 
@@ -21,24 +26,35 @@ The current OCPL connector can identify likely matches and attempts a basic avai
 3. Click `Load unpacked`
 4. Select this folder: `C:\Users\james\Projects\library-browser-plugin`
 
+After code changes, use **Reload** on the extension card, then refresh any open Goodreads or Amazon tabs.
+
 ## Configure it
 
 Open the extension options page to review or change:
 
 - Library name
 - Polaris catalog base URL
+- Show lookup metadata (for testing; also enables richer diagnostics on cards and list popups)
+- Export support report (downloads recent on-device lookup diagnostics; no remote telemetry)
 
-Default:
+Default catalog:
 
 - `https://catalog.onlib.org/polaris/`
 
-## Next step
+Save settings once so Chrome can grant optional access to your catalog host.
 
-The next improvement is to deepen the Polaris parsing so the extension can distinguish branch-level copy availability, holdability, and format with higher confidence.
+## Reporting a problem
+
+1. Enable **Show lookup metadata** in options (optional but helpful).
+2. Reproduce the issue on the book or list page.
+3. Use **Copy diagnostics** on the card/popup, or **Export support report** from options.
+4. Attach that JSON when filing a bug.
 
 ## Chrome Web Store
 
 Build a store ZIP (tests run first), then follow listing, privacy, API, and GitHub Actions steps in [docs/CHROME_WEB_STORE.md](docs/CHROME_WEB_STORE.md). For the store’s privacy disclosure, use a public HTTPS URL to [docs/privacy-policy.md](docs/privacy-policy.md) (for example the GitHub blob URL described in that doc).
+
+When updating the listing, keep the description and screenshots consistent with list/grid badges as well as detail-page cards.
 
 ## Tests
 
@@ -47,6 +63,6 @@ Build a store ZIP (tests run first), then follow listing, privacy, API, and GitH
 
 The integration test suite is traceable back to user stories and includes:
 
-- connector contract tests for OCPL Polaris
-- page-to-connector rendering tests for Goodreads and Amazon
+- connector contract tests for OCPL Polaris (including catalog URL cache behavior)
+- page-to-connector rendering tests for Goodreads (detail, list, grid) and Amazon
 - a registry of test cases and linked stories under `tests/traceability/`

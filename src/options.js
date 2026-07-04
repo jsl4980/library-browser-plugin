@@ -50,7 +50,7 @@
       catalogBaseUrl
     });
 
-    statusNode.textContent = "Saved. Refresh an Amazon or Goodreads book page to try OCPL lookup.";
+    statusNode.textContent = "Saved. Refresh a Goodreads or Amazon page to try OCPL lookup.";
   }
 
   form.addEventListener("submit", (event) => {
@@ -60,6 +60,29 @@
   showMetadataDebugInput.addEventListener("change", () => {
     void chrome.storage.sync.set({ showMetadataDebug: showMetadataDebugInput.checked });
   });
+
+  const exportButton = document.getElementById("export-support-report");
+  if (exportButton) {
+    exportButton.addEventListener("click", () => {
+      void (async () => {
+        try {
+          const report = await chrome.runtime.sendMessage({ type: "getSupportReport" });
+          const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
+          const url = URL.createObjectURL(blob);
+          const anchor = document.createElement("a");
+          const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+          anchor.href = url;
+          anchor.download = `library-browser-support-${stamp}.json`;
+          anchor.click();
+          URL.revokeObjectURL(url);
+          statusNode.textContent = "Support report downloaded.";
+        } catch (error) {
+          statusNode.textContent =
+            error instanceof Error ? error.message : "Could not export support report.";
+        }
+      })();
+    });
+  }
 
   void loadSettings();
 })(typeof globalThis !== "undefined" ? globalThis : self);

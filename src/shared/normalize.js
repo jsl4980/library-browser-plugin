@@ -36,11 +36,23 @@
     return main;
   }
 
+  /** Strip Listopia-style series suffixes, e.g. "Title (Series, #1)". */
+  function stripSeriesSuffix(value) {
+    return normalizeWhitespace(value).replace(/\s*\([^)]*#\d+[^)]*\)\s*$/u, "").trim();
+  }
+
+  /** Shared title cleanup for list and detail so keyword URLs align. */
+  function cleanBookTitle(value) {
+    return primaryTitleBeforeSubtitle(stripSeriesSuffix(value));
+  }
+
   app.normalize = {
     normalizeWhitespace,
     normalizeText,
     normalizeIsbn,
     encodeTemplateValue,
-    primaryTitleBeforeSubtitle
+    primaryTitleBeforeSubtitle,
+    stripSeriesSuffix,
+    cleanBookTitle
   };
 })(typeof globalThis !== "undefined" ? globalThis : self);

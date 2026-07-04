@@ -49,7 +49,7 @@
     );
   }
 
-  async function fetchCatalogPage(requestUrl) {
+  async function fetchCatalogPageUncached(requestUrl) {
     const response = await fetch(requestUrl, {
       method: "GET",
       // Same-origin catalog cookies avoid Polaris redirect loops (see redirect cap).
@@ -82,6 +82,38 @@
       url: finalUrl,
       text
     };
+  }
+
+  /**
+   * Fetch catalog HTML for an outbound request URL.
+   * Caches raw page text by outbound URL; analysis stays book-specific.
+   * Returns { page, cacheHit }.
+   */
+  async function fetchCatalogPage(requestUrl) {
+    const cache = app.catalogCache;
+    if (!cache) {
+      const page = await fetchCatalogPageUncached(requestUrl);
+      return { page, cacheHit: false };
+    }
+
+    const cached = await cache.getPage(requestUrl);
+    if (cached.hit) {
+      return { page: cached.page, cacheHit: true };
+    }
+
+    const inflight = cache.getPageInflight(requestUrl);
+    if (inflight) {
+      const page = await inflight;
+      return { page, cacheHit: true };
+    }
+
+    const promise = fetchCatalogPageUncached(requestUrl).then(async (page) => {
+      await cache.setPage(requestUrl, page);
+      return page;
+    });
+    cache.setPageInflight(requestUrl, promise);
+    const page = await promise;
+    return { page, cacheHit: false };
   }
 
   function pageHasMatch(book, normalizedPageText) {
@@ -778,6 +810,7 @@
         author: book.author || "",
         isbn13: book.isbn13 || "",
         isbn10: book.isbn10 || "",
+        goodreadsId: book.goodreadsId || "",
         normalizedTitle: book.normalizedTitle || "",
         normalizedAuthor: book.normalizedAuthor || "",
         sourceSite: book.sourceSite || "",
@@ -851,12 +884,13 @@
 
     if (isbnUrl) {
       try {
-        const page = await fetchCatalogPage(isbnUrl);
+        const { page, cacheHit } = await fetchCatalogPage(isbnUrl);
         const analysis = analyzeCatalogPage(book, page);
         tries.push({
           kind: "isbn",
           url: isbnUrl,
-          matched: analysis.matched
+          matched: analysis.matched,
+          cacheHit: Boolean(cacheHit)
         });
         if (analysis.matched) {
           exactMatch = shapeMatchFromAnalysis(book, settings, analysis);
@@ -866,6 +900,7 @@
           kind: "isbn",
           url: isbnUrl,
           matched: false,
+          cacheHit: false,
           error: error instanceof Error ? error.message : "Unexpected catalog lookup error."
         });
         return failFetch(isbnUrl, error);
@@ -874,12 +909,13 @@
 
     if (relatedUrl) {
       try {
-        const page = await fetchCatalogPage(relatedUrl);
+        const { page, cacheHit } = await fetchCatalogPage(relatedUrl);
         const analysis = analyzeCatalogPage(book, page);
         tries.push({
           kind: "related",
           url: relatedUrl,
-          matched: analysis.matched
+          matched: analysis.matched,
+          cacheHit: Boolean(cacheHit)
         });
         if (analysis.matched) {
           const candidate = shapeMatchFromAnalysis(book, settings, analysis);
@@ -895,6 +931,7 @@
           kind: "related",
           url: relatedUrl,
           matched: false,
+          cacheHit: false,
           error: error instanceof Error ? error.message : "Unexpected catalog lookup error."
         });
         return failFetch(relatedUrl, error);

@@ -256,6 +256,42 @@
       "fixtureId": "live-drift-detection",
       "expectedStatuses": ["available_now", "hold_available", "found", "not_found", "error"],
       "requiredInPr": false
+    },
+    {
+      "id": "TC-US9-GOODREADS-LIST-BADGES",
+      "stories": ["US9"],
+      "kind": "page",
+      "source": "fixture",
+      "fixtureId": "goodreads-list",
+      "expectedStatuses": ["available_now", "hold_available", "not_found"],
+      "requiredInPr": true
+    },
+    {
+      "id": "TC-US9-GOODREADS-GRID-BADGES",
+      "stories": ["US9"],
+      "kind": "page",
+      "source": "fixture",
+      "fixtureId": "goodreads-grid",
+      "expectedStatuses": ["available_now", "error"],
+      "requiredInPr": true
+    },
+    {
+      "id": "TC-US10-KEYWORD-URL-CACHE",
+      "stories": ["US10"],
+      "kind": "connector",
+      "source": "fixture",
+      "fixtureId": "ocpl-title-author-fallback",
+      "expectedStatus": "found",
+      "requiredInPr": true
+    },
+    {
+      "id": "TC-US10-NO-CROSS-STRATEGY-ALIAS",
+      "stories": ["US10"],
+      "kind": "connector",
+      "source": "fixture",
+      "fixtureId": "ocpl-isbn-available",
+      "expectedStatus": "available_now",
+      "requiredInPr": true
     }
   ]
 }

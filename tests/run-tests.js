@@ -16,7 +16,12 @@ async function run(name, fn) {
 async function main() {
   const { stories, testCases } = loadTraceability();
   const fixtures = new Map(loadOcplFixtures().map((fixture) => [fixture.id, fixture]));
-  const connectorCases = testCases.filter((testCase) => testCase.kind === "connector" && testCase.source === "fixture");
+  const connectorCases = testCases.filter(
+    (testCase) =>
+      testCase.kind === "connector" &&
+      testCase.source === "fixture" &&
+      !testCase.id.startsWith("TC-US10-")
+  );
   const pageCases = new Map(testCases.filter((testCase) => testCase.kind === "page").map((testCase) => [testCase.id, testCase]));
 
   await run("traceability registry covers all connector fixture tests", async () => {
@@ -106,7 +111,7 @@ async function main() {
       }
     });
 
-    await new Promise((resolve) => setImmediate(resolve));
+    await harness.flush();
     const card = harness.getCard();
 
     assertTraceability({ stories, testCase });
@@ -131,7 +136,7 @@ async function main() {
       }
     });
 
-    await new Promise((resolve) => setImmediate(resolve));
+    await harness.flush();
     const card = harness.getCard();
 
     assertTraceability({ stories, testCase });
@@ -156,7 +161,7 @@ async function main() {
       }
     });
 
-    await new Promise((resolve) => setImmediate(resolve));
+    await harness.flush();
     const card = harness.getCard();
 
     assertTraceability({ stories, testCase });
@@ -181,7 +186,7 @@ async function main() {
       }
     });
 
-    await new Promise((resolve) => setImmediate(resolve));
+    await harness.flush();
     const card = harness.getCard();
 
     assertTraceability({ stories, testCase });
@@ -207,7 +212,7 @@ async function main() {
       }
     });
 
-    await new Promise((resolve) => setImmediate(resolve));
+    await harness.flush();
     const card = harness.getCard();
 
     assertTraceability({ stories, testCase });
@@ -231,7 +236,7 @@ async function main() {
       }
     });
 
-    await new Promise((resolve) => setImmediate(resolve));
+    await harness.flush();
     const card = harness.getCard();
 
     assertTraceability({ stories, testCase });
@@ -256,7 +261,7 @@ async function main() {
       }
     });
 
-    await new Promise((resolve) => setImmediate(resolve));
+    await harness.flush();
 
     assertTraceability({ stories, testCase });
     assert.equal(harness.getCard(), null);
@@ -277,7 +282,7 @@ async function main() {
       }
     });
 
-    await new Promise((resolve) => setImmediate(resolve));
+    await harness.flush();
     const card = harness.getCard();
     const action = card.querySelector(".library-browser-card__action");
 
@@ -301,7 +306,7 @@ async function main() {
       }
     });
 
-    await new Promise((resolve) => setImmediate(resolve));
+    await harness.flush();
     const card = harness.getCard();
 
     assertTraceability({ stories, testCase });
@@ -355,7 +360,7 @@ async function main() {
       }
     });
 
-    await new Promise((resolve) => setImmediate(resolve));
+    await harness.flush();
     const card = harness.getCard();
     const exactWrap = card.querySelector(".library-browser-card__match--exact");
     const relatedWrap = card.querySelector(".library-browser-card__match--related");
@@ -400,7 +405,7 @@ async function main() {
       }
     });
 
-    await new Promise((resolve) => setImmediate(resolve));
+    await harness.flush();
     const card = harness.getCard();
     const exactWrap = card.querySelector(".library-browser-card__match--exact");
     const relatedWrap = card.querySelector(".library-browser-card__match--related");
@@ -432,7 +437,7 @@ async function main() {
       }
     });
 
-    await new Promise((resolve) => setImmediate(resolve));
+    await harness.flush();
     const card = harness.getCard();
     const formatsList = card.querySelector(".library-browser-card__formats");
     const items = formatsList.querySelectorAll(".library-browser-card__format");
@@ -481,7 +486,7 @@ async function main() {
       }
     });
 
-    await new Promise((resolve) => setImmediate(resolve));
+    await harness.flush();
     const card = harness.getCard();
     const debugBody = card.querySelector(".library-browser-card__debug-body");
 
@@ -492,9 +497,180 @@ async function main() {
     assert.match(debugBody.textContent, /lookupUrlsOrdered/);
     assert.match(debugBody.textContent, /The Testable Library/);
   });
+
+  await run("TC-US9-GOODREADS-LIST-BADGES renders status badges for list rows", async () => {
+    const testCase = pageCases.get("TC-US9-GOODREADS-LIST-BADGES");
+    const resultsByTitle = {
+      "Available Book": {
+        status: "available_now",
+        summary: "Available now at OCPL",
+        detail: "Available",
+        actionUrl: "https://catalog.onlib.org/polaris/view.aspx?keyword=Available%20Book",
+        libraryName: "Onondaga County Public Library System"
+      },
+      "Hold Book": {
+        status: "hold_available",
+        summary: "Found at OCPL",
+        detail: "Hold",
+        actionUrl: "https://catalog.onlib.org/polaris/view.aspx?keyword=Hold%20Book",
+        libraryName: "Onondaga County Public Library System"
+      },
+      "Missing Book": {
+        status: "not_found",
+        summary: "Not found at OCPL",
+        detail: "Missing",
+        actionUrl: "https://catalog.onlib.org/polaris/view.aspx?keyword=Missing%20Book",
+        libraryName: "Onondaga County Public Library System"
+      }
+    };
+
+    const harness = createPageHarness({
+      html: loadPageFixture("goodreads-list.html"),
+      url: "https://www.goodreads.com/list/show/1.Best_Books_Ever",
+      runtimeResults(message) {
+        return resultsByTitle[message.book.title] || resultsByTitle["Missing Book"];
+      }
+    });
+
+    await harness.flush();
+    const badges = harness.getBadges();
+
+    assertTraceability({ stories, testCase });
+    assert.equal(badges.length, 3);
+    assert.equal(harness.sentMessages.length, 3);
+    assert.ok(harness.sentMessages.every((message) => message.mode === "list"));
+    assert.ok(harness.sentMessages.every((message) => !message.book.isbn13));
+    assert.equal(badges.filter((badge) => badge.dataset.tone === "available").length, 1);
+    assert.equal(badges.filter((badge) => badge.dataset.tone === "catalog").length, 1);
+    assert.equal(badges.filter((badge) => badge.dataset.tone === "missing").length, 1);
+
+    const availableBadge = badges.find((badge) => badge.dataset.tone === "available");
+    availableBadge.dispatchEvent({
+      type: "click",
+      preventDefault() {},
+      stopPropagation() {}
+    });
+    await harness.flush();
+    const popup = harness.document.getElementById("library-browser-popup");
+    assert.ok(popup, "Expected popup after badge click");
+    assert.match(popup.textContent, /Available now at OCPL/);
+  });
+
+  await run("TC-US9-GOODREADS-GRID-BADGES renders grid badges including errors", async () => {
+    const testCase = pageCases.get("TC-US9-GOODREADS-GRID-BADGES");
+    const harness = createPageHarness({
+      html: loadPageFixture("goodreads-grid.html"),
+      url: "https://www.goodreads.com/review/list/1",
+      runtimeResults(message) {
+        if (message.book.title === "Grid Available") {
+          return {
+            status: "available_now",
+            summary: "Available now at OCPL",
+            detail: "Available",
+            actionUrl: "https://catalog.onlib.org/polaris/view.aspx?keyword=Grid%20Available",
+            libraryName: "Onondaga County Public Library System"
+          };
+        }
+        return {
+          status: "error",
+          summary: "Lookup failed",
+          detail: "Catalog request failed. Enable debug or export a support report from settings.",
+          actionUrl: "",
+          libraryName: ""
+        };
+      }
+    });
+
+    await harness.flush();
+    const badges = harness.getBadges();
+
+    assertTraceability({ stories, testCase });
+    assert.equal(badges.length, 2);
+    assert.equal(badges.filter((badge) => badge.dataset.tone === "available").length, 1);
+    assert.equal(badges.filter((badge) => badge.dataset.tone === "error").length, 1);
+    assert.equal(harness.getCard(), null);
+  });
+
+  await run("TC-US10-KEYWORD-URL-CACHE reuses keyword catalog fetch for identical title/author", async () => {
+    const testCase = testCases.find((entry) => entry.id === "TC-US10-KEYWORD-URL-CACHE");
+    const fixture = fixtures.get(testCase.fixtureId);
+    const requests = [];
+    const harness = createConnectorHarness({
+      fetchImpl: async (url) => {
+        requests.push(url.toString());
+        return {
+          ok: true,
+          status: 200,
+          async text() {
+            return fixture.responseBody;
+          }
+        };
+      }
+    });
+
+    const book = harness.toBookMetadata(fixture.book);
+    const settings = {
+      libraryName: "Onondaga County Public Library System",
+      catalogBaseUrl: "https://catalog.onlib.org/polaris/"
+    };
+
+    const first = await harness.connector.lookup(book, settings, { includeDebug: true });
+    const second = await harness.connector.lookup(book, settings, { includeDebug: true });
+
+    assertTraceability({ stories, testCase });
+    assert.equal(first.status, testCase.expectedStatus);
+    assert.equal(second.status, testCase.expectedStatus);
+    assert.equal(requests.length, 1, "second lookup should reuse cached keyword page");
+    assert.equal(first.debug.catalog.tries[0].cacheHit, false);
+    assert.equal(second.debug.catalog.tries[0].cacheHit, true);
+  });
+
+  await run("TC-US10-NO-CROSS-STRATEGY-ALIAS does not serve ISBN result for title/author-only book", async () => {
+    const testCase = testCases.find((entry) => entry.id === "TC-US10-NO-CROSS-STRATEGY-ALIAS");
+    const fixture = fixtures.get(testCase.fixtureId);
+    const requests = [];
+    const harness = createConnectorHarness({
+      fetchImpl: async (url) => {
+        requests.push(url.toString());
+        return {
+          ok: true,
+          status: 200,
+          url: url.toString(),
+          async text() {
+            return fixture.responseBody;
+          }
+        };
+      }
+    });
+
+    const settings = {
+      libraryName: "Onondaga County Public Library System",
+      catalogBaseUrl: "https://catalog.onlib.org/polaris/"
+    };
+
+    const isbnBook = harness.toBookMetadata(fixture.book);
+    const titleOnlyBook = harness.toBookMetadata({
+      title: fixture.book.title,
+      author: fixture.book.author,
+      isbn13: "",
+      isbn10: "",
+      sourceSite: "goodreads",
+      sourceUrl: fixture.book.sourceUrl
+    });
+
+    await harness.connector.lookup(isbnBook, settings, { includeDebug: true });
+    const titleResult = await harness.connector.lookup(titleOnlyBook, settings, { includeDebug: true });
+
+    assertTraceability({ stories, testCase });
+    assert.ok(titleResult.debug.catalog.tries.some((entry) => entry.kind === "related"));
+    assert.ok(titleResult.debug.catalog.tries.every((entry) => entry.kind !== "isbn"));
+    // Keyword URL may be a cache hit from the prior ISBN lookup's related leg — that is correct.
+    assert.equal(titleResult.debug.catalog.tries.find((entry) => entry.kind === "related").cacheHit, true);
+  });
 }
 
 main().catch((error) => {
   console.error(error.stack || error.message || String(error));
   process.exitCode = 1;
 });
+
