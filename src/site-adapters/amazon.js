@@ -3,7 +3,27 @@
   const app = root.LibraryBrowser;
   const { normalizeWhitespace, primaryTitleBeforeSubtitle } = app.normalize;
 
-  const BOOK_EVIDENCE_SELECTORS = [
+  const DETAIL_ROW_SELECTOR = [
+    "#detailBullets_feature_div li",
+    "#detailBulletsWrapper_feature_div li",
+    "#bookDetails_feature_div li",
+    "#productDetails_detailBullets_sections1 tr",
+    "#productDetails_detailBullets_sections1 li",
+    "#prodDetails tr",
+    "#prodDetails li",
+    "#productDetails_db_sections tr",
+    "#productDetails_db_sections li",
+    "#audibleProductDetails li",
+    "#audibleProductDetails_feature_div li",
+    "[id^='rpi-attribute-book_details'] li",
+    "[id^='rpi-attribute-book_details'] tr"
+  ].join(", ");
+  const BOOK_FORMAT_SELECTORS = ["#tmmSwatches", "#formats"];
+  const BOOK_CATEGORY_SELECTORS = [
+    "#wayfinding-breadcrumbs_feature_div",
+    "#wayfinding-breadcrumbs_container"
+  ];
+  const BOOK_DETAIL_SELECTORS = [
     "#detailBullets_feature_div",
     "#bookDetails_feature_div",
     "#detailBulletsWrapper_feature_div",
@@ -11,11 +31,6 @@
     "#productDetails_detailBullets_sections1",
     "#productDetails_techSpec_section_1",
     "#productDetails_db_sections",
-    "#productOverview_feature_div",
-    "#wayfinding-breadcrumbs_feature_div",
-    "#wayfinding-breadcrumbs_container",
-    "#tmmSwatches",
-    "#formats",
     "#audibleProductDetails",
     "#audibleProductDetails_feature_div",
     "[id^='rpi-attribute-book_details']"
@@ -32,21 +47,16 @@
     /\bmass market paperback\b/i,
     /\bboard book\b/i,
     /\blibrary binding\b/i,
-    /\bkindle(?: edition)?\b/i,
-    /\baudible audiobook\b/i,
-    /\baudio cd\b/i,
-    /\bmp3 cd\b/i
+    /\bkindle edition\b/i,
+    /\baudible audiobook\b/i
   ];
   const BOOK_DETAIL_PATTERNS = [
-    /\bisbn-1[03]\b/i,
     /\bpublisher\b/i,
     /\bpublication date\b/i,
     /\bprint length\b/i,
-    /\blanguage\b/i,
     /\breading age\b/i,
     /\bgrade level\b/i,
     /\blexile measure\b/i,
-    /\bfile size\b/i,
     /\btext-to-speech\b/i,
     /\bscreen reader\b/i,
     /\benhanced typesetting\b/i,
@@ -79,6 +89,10 @@
     );
   }
 
+  function detailRows() {
+    return Array.from(document.querySelectorAll(DETAIL_ROW_SELECTOR));
+  }
+
   function hasPattern(patterns, text) {
     return patterns.some((pattern) => pattern.test(text));
   }
@@ -91,29 +105,89 @@
     return value.replace(/[^0-9Xx]/g, "").toUpperCase();
   }
 
-  function extractIsbn() {
-    const detailBuckets = document.querySelectorAll(
-      "#detailBullets_feature_div, #bookDetails_feature_div, #detailBulletsWrapper_feature_div, #productDetails_detailBullets_sections1, #prodDetails"
-    );
+  function normalizeDetailText(value) {
+    return normalizeWhitespace(String(value || "").replace(/[\u200e\u200f\u00a0]/g, " "));
+  }
 
-    for (const bucket of detailBuckets) {
-      const text = bucket.textContent || "";
-      const match13 = text.match(/\b97[89](?:[\s-]?[0-9]){10}\b/);
-      if (match13) {
-        return { isbn13: normalizeIsbn(match13[0]), isbn10: "" };
+  function isValidIsbn10(isbn) {
+    if (!/^[0-9]{9}[0-9X]$/.test(isbn)) {
+      return false;
+    }
+
+    let sum = 0;
+    for (let index = 0; index < 10; index += 1) {
+      const digit = isbn[index] === "X" ? 10 : Number(isbn[index]);
+      sum += digit * (10 - index);
+    }
+
+    return sum % 11 === 0;
+  }
+
+  function isValidIsbn13(isbn) {
+    if (!/^97[89][0-9]{10}$/.test(isbn)) {
+      return false;
+    }
+
+    let sum = 0;
+    for (let index = 0; index < 12; index += 1) {
+      sum += Number(isbn[index]) * (index % 2 === 0 ? 1 : 3);
+    }
+
+    const check = (10 - (sum % 10)) % 10;
+    return check === Number(isbn[12]);
+  }
+
+  function classifyIsbnValue(value) {
+    const compact = normalizeIsbn(value);
+    if (compact.length === 13 && isValidIsbn13(compact)) {
+      return { isbn13: compact, isbn10: "" };
+    }
+
+    if (compact.length === 10 && isValidIsbn10(compact)) {
+      return { isbn13: "", isbn10: compact };
+    }
+
+    return null;
+  }
+
+  function isbnFromRow(row) {
+    const text = normalizeDetailText(row.textContent);
+    const match = text.match(/^ISBN(?:-1[03])?\b\s*:?\s*(.+)$/i);
+    if (!match) {
+      return null;
+    }
+
+    return classifyIsbnValue(match[1]);
+  }
+
+  function extractIsbn() {
+    let isbn13 = "";
+    let isbn10 = "";
+
+    for (const row of detailRows()) {
+      const parsed = isbnFromRow(row);
+      if (!parsed) {
+        continue;
       }
 
-      const match10 = text.match(/\b[0-9](?:[\s-]?[0-9]){8}[\s-]?[0-9Xx]\b/);
-      if (match10) {
-        return { isbn13: "", isbn10: normalizeIsbn(match10[0]) };
+      if (parsed.isbn13) {
+        isbn13 = parsed.isbn13;
+      }
+      if (parsed.isbn10) {
+        isbn10 = parsed.isbn10;
       }
     }
 
-    return { isbn13: "", isbn10: "" };
+    return { isbn13, isbn10 };
   }
 
-  function hasAmazonBookAuthor() {
-    return Boolean(document.querySelector(".author .a-link-normal, #bylineInfo .author a, #bylineInfo .author"));
+  function categoryEvidenceText() {
+    const breadcrumbs = textFromSelectors(BOOK_CATEGORY_SELECTORS);
+    const ranks = detailRows()
+      .map((row) => normalizeDetailText(row.textContent))
+      .filter((text) => /best sellers rank/i.test(text));
+
+    return normalizeWhitespace([breadcrumbs, ...ranks].join(" "));
   }
 
   function isBookProduct(isbn) {
@@ -121,17 +195,22 @@
       return true;
     }
 
-    const evidenceText = textFromSelectors(BOOK_EVIDENCE_SELECTORS);
-    if (!evidenceText) {
-      return false;
-    }
-
-    if (hasPattern(BOOK_CATEGORY_PATTERNS, evidenceText) || hasPattern(BOOK_FORMAT_PATTERNS, evidenceText)) {
+    const formatText = textFromSelectors(BOOK_FORMAT_SELECTORS);
+    if (formatText && hasPattern(BOOK_FORMAT_PATTERNS, formatText)) {
       return true;
     }
 
-    const detailSignals = countMatchingPatterns(BOOK_DETAIL_PATTERNS, evidenceText);
-    return detailSignals >= 2 || (hasAmazonBookAuthor() && detailSignals >= 1);
+    const categoryText = categoryEvidenceText();
+    if (categoryText && hasPattern(BOOK_CATEGORY_PATTERNS, categoryText)) {
+      return true;
+    }
+
+    const detailText = textFromSelectors(BOOK_DETAIL_SELECTORS);
+    if (!detailText) {
+      return false;
+    }
+
+    return countMatchingPatterns(BOOK_DETAIL_PATTERNS, detailText) >= 2;
   }
 
   const adapter = {

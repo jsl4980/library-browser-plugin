@@ -71,7 +71,7 @@ test("TC-US2-AMAZON-RENDER renders an Amazon availability card", async () => {
       status: "hold_available",
       summary: "Found at OCPL",
       detail: "The book appears in the catalog and may require a hold or sign-in for copy details.",
-      actionUrl: "https://catalog.onlib.org/polaris/view.aspx?isbn=9781111111111",
+      actionUrl: "https://catalog.onlib.org/polaris/view.aspx?isbn=9780735211292",
       libraryName: "Onondaga County Public Library System"
     }
   });
@@ -84,7 +84,7 @@ test("TC-US2-AMAZON-RENDER renders an Amazon availability card", async () => {
   assert.equal(card.dataset.status, testCase.expectedStatus);
   assert.equal(harness.sentMessages[0].book.title, "Waiting for Circulation");
   assert.equal(harness.sentMessages[0].book.author, "Nina Queue");
-  assert.equal(harness.sentMessages[0].book.isbn13, "9781111111111");
+  assert.equal(harness.sentMessages[0].book.isbn13, "9780735211292");
 });
 
 test("TC-US2-AMAZON-SUBTITLE-TITLE strips retailer subtitle before lookup", async () => {
@@ -96,7 +96,7 @@ test("TC-US2-AMAZON-SUBTITLE-TITLE strips retailer subtitle before lookup", asyn
       status: "hold_available",
       summary: "Found at OCPL",
       detail: "The book appears in the catalog and may require a hold or sign-in for copy details.",
-      actionUrl: "https://catalog.onlib.org/polaris/view.aspx?isbn=0735211308",
+      actionUrl: "https://catalog.onlib.org/polaris/view.aspx?isbn=0735211299",
       libraryName: "Onondaga County Public Library System"
     }
   });
@@ -109,7 +109,7 @@ test("TC-US2-AMAZON-SUBTITLE-TITLE strips retailer subtitle before lookup", asyn
   assert.equal(card.dataset.status, testCase.expectedStatus);
   assert.equal(harness.sentMessages[0].book.title, "Atomic Habits");
   assert.equal(harness.sentMessages[0].book.author, "James Clear");
-  assert.equal(harness.sentMessages[0].book.isbn10, "0735211308");
+  assert.equal(harness.sentMessages[0].book.isbn10, "0735211299");
   assert.equal(harness.sentMessages[0].book.isbn13, "");
 });
 
@@ -122,7 +122,7 @@ test("TC-US2-AMAZON-LEGACY-ASIN-URL renders on legacy Amazon ASIN URLs", async (
       status: "hold_available",
       summary: "Found at OCPL",
       detail: "The book appears in the catalog and may require a hold or sign-in for copy details.",
-      actionUrl: "https://catalog.onlib.org/polaris/view.aspx?isbn=9781111111111",
+      actionUrl: "https://catalog.onlib.org/polaris/view.aspx?isbn=9780735211292",
       libraryName: "Onondaga County Public Library System"
     }
   });
@@ -181,6 +181,110 @@ test("TC-US2-AMAZON-NON-BOOK-SKIP skips Amazon products without book evidence", 
   assertTraceability({ stories, testCase });
   assert.equal(harness.getCard(), null);
   assert.equal(harness.sentMessages.length, 0);
+});
+
+for (const [name, fixtureName] of [
+  ["TC-US2-AMAZON-DUMBBELL-SKIP skips dumbbell pages with part numbers", "amazon-dumbbell.html"],
+  ["TC-US2-AMAZON-TUMBLER-SKIP skips tumbler pages with part numbers", "amazon-tumbler.html"],
+  ["TC-US2-AMAZON-BLURAY-SKIP skips Blu-ray pages with an actor byline", "amazon-bluray.html"],
+  ["TC-US2-AMAZON-MUSIC-CD-SKIP skips music Audio CD pages", "amazon-music-cd.html"],
+  ["TC-US2-AMAZON-KINDLE-CASE-SKIP skips Kindle accessory pages", "amazon-kindle-case.html"]
+]) {
+  test(name, async () => {
+    const testCase = pageCases.get(name.split(" ")[0]);
+    const harness = createPageHarness({
+      html: loadPageFixture(fixtureName),
+      url: "https://www.amazon.com/dp/nonbook",
+      runtimeResult: {
+        status: "found",
+        summary: "Unexpected lookup",
+        detail: "This result should not be rendered.",
+        actionUrl: "https://catalog.onlib.org/polaris/view.aspx",
+        libraryName: "Onondaga County Public Library System"
+      }
+    });
+
+    await harness.flush();
+
+    assertTraceability({ stories, testCase });
+    assert.equal(harness.getCard(), null);
+    assert.equal(harness.sentMessages.length, 0);
+  });
+}
+
+test("TC-US2-AMAZON-AUDIBLE renders an Audible book without an ISBN", async () => {
+  const testCase = pageCases.get("TC-US2-AMAZON-AUDIBLE");
+  const harness = createPageHarness({
+    html: loadPageFixture("amazon-audible.html"),
+    url: "https://www.amazon.com/dp/audiblebook",
+    runtimeResult: {
+      status: "found",
+      summary: "Found at OCPL",
+      detail: "The book appears in the OCPL catalog.",
+      actionUrl: "https://catalog.onlib.org/polaris/view.aspx?keyword=Project%20Hail%20Mary%20Andy%20Weir",
+      libraryName: "Onondaga County Public Library System"
+    }
+  });
+
+  await harness.flush();
+  const card = harness.getCard();
+
+  assertTraceability({ stories, testCase });
+  assert.ok(card, "Expected a library card to be inserted");
+  assert.equal(card.dataset.status, testCase.expectedStatus);
+  assert.equal(harness.sentMessages[0].book.title, "Project Hail Mary");
+  assert.equal(harness.sentMessages[0].book.author, "Andy Weir");
+  assert.equal(harness.sentMessages[0].book.isbn13, "");
+  assert.equal(harness.sentMessages[0].book.isbn10, "");
+});
+
+test("TC-US2-AMAZON-AUDIOBOOK-CD keeps an audiobook CD with a labeled ISBN", async () => {
+  const testCase = pageCases.get("TC-US2-AMAZON-AUDIOBOOK-CD");
+  const harness = createPageHarness({
+    html: loadPageFixture("amazon-audiobook-cd.html"),
+    url: "https://www.amazon.com/dp/audiobookcd",
+    runtimeResult: {
+      status: "found",
+      summary: "Found at OCPL",
+      detail: "The book appears in the OCPL catalog.",
+      actionUrl: "https://catalog.onlib.org/polaris/view.aspx?isbn=9780061983948",
+      libraryName: "Onondaga County Public Library System"
+    }
+  });
+
+  await harness.flush();
+  const card = harness.getCard();
+
+  assertTraceability({ stories, testCase });
+  assert.ok(card, "Expected a library card to be inserted");
+  assert.equal(card.dataset.status, testCase.expectedStatus);
+  assert.equal(harness.sentMessages[0].book.title, "The Carrie Diaries");
+  assert.equal(harness.sentMessages[0].book.isbn13, "9780061983948");
+  assert.equal(harness.sentMessages[0].book.isbn10, "");
+});
+
+test("TC-US2-AMAZON-ISBN10-X accepts an ISBN-10 check digit of X", async () => {
+  const testCase = pageCases.get("TC-US2-AMAZON-ISBN10-X");
+  const harness = createPageHarness({
+    html: loadPageFixture("amazon-isbn10-x.html"),
+    url: "https://www.amazon.com/dp/isbn10x",
+    runtimeResult: {
+      status: "found",
+      summary: "Found at OCPL",
+      detail: "The book appears in the OCPL catalog.",
+      actionUrl: "https://catalog.onlib.org/polaris/view.aspx?isbn=080442957X",
+      libraryName: "Onondaga County Public Library System"
+    }
+  });
+
+  await harness.flush();
+  const card = harness.getCard();
+
+  assertTraceability({ stories, testCase });
+  assert.ok(card, "Expected a library card to be inserted");
+  assert.equal(card.dataset.status, testCase.expectedStatus);
+  assert.equal(harness.sentMessages[0].book.isbn10, "080442957X");
+  assert.equal(harness.sentMessages[0].book.isbn13, "");
 });
 
 test("TC-US4-CTA-LINK points to the OCPL catalog", async () => {

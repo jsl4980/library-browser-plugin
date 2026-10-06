@@ -158,6 +158,78 @@
       "requiredInPr": true
     },
     {
+      "id": "TC-US2-AMAZON-DUMBBELL-SKIP",
+      "stories": ["US2", "US6"],
+      "kind": "page",
+      "source": "fixture",
+      "fixtureId": "amazon-dumbbell",
+      "expectedStatus": "skipped",
+      "requiredInPr": true
+    },
+    {
+      "id": "TC-US2-AMAZON-TUMBLER-SKIP",
+      "stories": ["US2", "US6"],
+      "kind": "page",
+      "source": "fixture",
+      "fixtureId": "amazon-tumbler",
+      "expectedStatus": "skipped",
+      "requiredInPr": true
+    },
+    {
+      "id": "TC-US2-AMAZON-BLURAY-SKIP",
+      "stories": ["US2", "US6"],
+      "kind": "page",
+      "source": "fixture",
+      "fixtureId": "amazon-bluray",
+      "expectedStatus": "skipped",
+      "requiredInPr": true
+    },
+    {
+      "id": "TC-US2-AMAZON-MUSIC-CD-SKIP",
+      "stories": ["US2", "US6"],
+      "kind": "page",
+      "source": "fixture",
+      "fixtureId": "amazon-music-cd",
+      "expectedStatus": "skipped",
+      "requiredInPr": true
+    },
+    {
+      "id": "TC-US2-AMAZON-KINDLE-CASE-SKIP",
+      "stories": ["US2", "US6"],
+      "kind": "page",
+      "source": "fixture",
+      "fixtureId": "amazon-kindle-case",
+      "expectedStatus": "skipped",
+      "requiredInPr": true
+    },
+    {
+      "id": "TC-US2-AMAZON-AUDIBLE",
+      "stories": ["US2", "US6"],
+      "kind": "page",
+      "source": "fixture",
+      "fixtureId": "amazon-audible",
+      "expectedStatus": "found",
+      "requiredInPr": true
+    },
+    {
+      "id": "TC-US2-AMAZON-AUDIOBOOK-CD",
+      "stories": ["US2", "US6"],
+      "kind": "page",
+      "source": "fixture",
+      "fixtureId": "amazon-audiobook-cd",
+      "expectedStatus": "found",
+      "requiredInPr": true
+    },
+    {
+      "id": "TC-US2-AMAZON-ISBN10-X",
+      "stories": ["US2", "US6"],
+      "kind": "page",
+      "source": "fixture",
+      "fixtureId": "amazon-isbn10-x",
+      "expectedStatus": "found",
+      "requiredInPr": true
+    },
+    {
       "id": "TC-US4-CTA-LINK",
       "stories": ["US4"],
       "kind": "page",
