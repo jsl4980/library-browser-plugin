@@ -2,7 +2,7 @@
 
 Library Browser Plugin is a Chrome extension that checks whether books you find on Goodreads or Amazon appear in the Onondaga County Public Library System catalog.
 
-## Current status (v0.3.0)
+## Current status (v0.4.0)
 
 - **Goodreads book detail pages** — inline result card with library availability
 - **Goodreads list and grid pages** (shelves, Listopia, search, author pages, related-book carousels, and similar) — small status badges on covers (bottom-right)
@@ -11,7 +11,8 @@ Library Browser Plugin is a Chrome extension that checks whether books you find 
   - Red: not found
   - Gray: lookup error or catalog setup needed
   - Click a badge for the info card popup (catalog links work; close with outside click, Escape, or the badge again)
-- **Amazon book detail pages** — inline result card (same as before)
+- **Amazon book detail pages** — inline result card, including Kindle pages that have no ISBN
+- **Other editions** — a paperback or hardcover page also lists other print records and formats from the title search
 - Extracts title, author, and ISBN when the page exposes them (list/grid rows use title/author only)
 - OCPL Polaris catalog lookup via ISBN and/or keyword search
 - Local caches (memory + `chrome.storage.local`) avoid repeating identical catalog requests; ISBN and title/author results are never treated as interchangeable

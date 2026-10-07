@@ -51,7 +51,7 @@ function createChromeMock({ sentMessages, storageValues, runtimeResults }) {
     },
     runtime: {
       getManifest() {
-        return { version: "0.3.0" };
+        return { version: "0.4.0" };
       },
       sendMessage(message) {
         sentMessages.push(message);
