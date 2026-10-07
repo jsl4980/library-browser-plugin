@@ -33,6 +33,7 @@ function buildResultCacheKey(settings, book, includeDebug) {
     settings.libraryName,
     settings.catalogBaseUrl,
     LibraryBrowser.bookMetadata.bestLookupKey(book),
+    `v:${LibraryBrowser.catalogCache.RESULT_CACHE_VERSION || 1}`,
     includeDebug ? "d:1" : "d:0"
   ].join("|");
 }

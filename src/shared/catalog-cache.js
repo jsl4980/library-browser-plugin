@@ -3,6 +3,7 @@
   const app = root.LibraryBrowser;
 
   const RESULT_TTL_MS = 45 * 60 * 1000;
+  const RESULT_CACHE_VERSION = 2;
   const PAGE_TTL_MS = 60 * 60 * 1000;
   const MAX_PAGE_ENTRIES = 40;
   const MAX_PAGE_BYTES = 4 * 1024 * 1024;
@@ -183,7 +184,7 @@
     if (!result || !result.status) {
       return false;
     }
-    return result.status !== "error" && result.status !== "needs_setup";
+    return result.status !== "error" && result.status !== "needs_setup" && result.status !== "not_found";
   }
 
   async function getResult(cacheKey) {
@@ -254,6 +255,7 @@
 
   app.catalogCache = {
     RESULT_TTL_MS,
+    RESULT_CACHE_VERSION,
     PAGE_TTL_MS,
     getPage,
     setPage,

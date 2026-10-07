@@ -28,6 +28,35 @@
       "requiredInPr": true
     },
     {
+      "id": "TC-US3-KINDLE-APOSTROPHE-AUTHOR",
+      "stories": ["US3", "US5", "US7"],
+      "kind": "connector",
+      "source": "fixture",
+      "fixtureId": "ocpl-kindle-apostrophe",
+      "expectedStatus": "available_now",
+      "expectedFormatBuckets": ["physical_book", "ebook"],
+      "requiredInPr": true
+    },
+    {
+      "id": "TC-US3-SERIES-PAREN-TITLE",
+      "stories": ["US3", "US5", "US7"],
+      "kind": "connector",
+      "source": "fixture",
+      "fixtureId": "ocpl-series-paren-title",
+      "expectedStatus": "available_now",
+      "expectedFormatBuckets": ["physical_book", "ebook"],
+      "requiredInPr": true
+    },
+    {
+      "id": "TC-US5-QUERY-ECHO-NOT-FOUND",
+      "stories": ["US5", "US6"],
+      "kind": "connector",
+      "source": "fixture",
+      "fixtureId": "ocpl-query-echo-only",
+      "expectedStatus": "not_found",
+      "requiredInPr": true
+    },
+    {
       "id": "TC-US5-NOT-FOUND",
       "stories": ["US5"],
       "kind": "connector",

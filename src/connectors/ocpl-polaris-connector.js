@@ -21,14 +21,20 @@
     return joinUrl(baseUrl, `view.aspx?isbn=${encodeTemplateValue(book.isbn13 || book.isbn10)}`);
   }
 
+  /** Drop a trailing "(Series)" so the keyword search is not limited to one edition. */
+  function titleForKeywordSearch(title) {
+    const stripped = String(title || "").replace(/\s*\([^)]*\)\s*$/u, "").trim();
+    return stripped || String(title || "");
+  }
+
   /** Prefer title + author when both exist; otherwise title-only. */
   function buildRelatedLookupUrl(book, settings) {
-    if (!book.title) {
+    const title = titleForKeywordSearch(book.title);
+    if (!title) {
       return "";
     }
     const baseUrl = getBaseUrl(settings);
-    const keyword =
-      book.title && book.author ? `${book.title} ${book.author}` : book.title;
+    const keyword = book.author ? `${title} ${book.author}` : title;
     return joinUrl(baseUrl, `view.aspx?keyword=${encodeTemplateValue(keyword)}`);
   }
 
@@ -116,13 +122,94 @@
     return { page, cacheHit: false };
   }
 
-  function pageHasMatch(book, normalizedPageText) {
-    const isbn13Match = book.isbn13 && normalizedPageText.includes(normalizeText(book.isbn13));
-    const isbn10Match = book.isbn10 && normalizedPageText.includes(normalizeText(book.isbn10));
-    const titleMatch = book.normalizedTitle && normalizedPageText.includes(book.normalizedTitle);
-    const authorMatch = !book.normalizedAuthor || normalizedPageText.includes(book.normalizedAuthor);
+  function codePointToChar(code) {
+    if (!Number.isFinite(code) || code < 0 || code > 0x10ffff) {
+      return "";
+    }
+    try {
+      return String.fromCodePoint(code);
+    } catch {
+      return "";
+    }
+  }
 
-    return Boolean(isbn13Match || isbn10Match || (titleMatch && authorMatch));
+  function decodeHtmlEntities(value) {
+    return value
+      .replace(/&#x([0-9a-f]+);/gi, (_, hex) => codePointToChar(parseInt(hex, 16)))
+      .replace(/&#(\d+);/g, (_, dec) => codePointToChar(parseInt(dec, 10)))
+      .replace(/&nbsp;/gi, " ")
+      .replace(/&amp;/gi, "&")
+      .replace(/&quot;/gi, '"')
+      .replace(/&apos;/gi, "'")
+      .replace(/&lt;/gi, "<")
+      .replace(/&gt;/gi, ">");
+  }
+
+  /**
+   * Visible catalog text for title/author/ISBN checks.
+   * Polaris hit-highlights split words and encodes apostrophes as &#39;, which
+   * normalizeText would otherwise turn into digits. The search box echoes the
+   * query, so form controls are dropped before matching.
+   */
+  function catalogMatchText(html) {
+    const withoutControls = String(html || "")
+      .replace(/<script[\s\S]*?<\/script>/gi, " ")
+      .replace(/<style[\s\S]*?<\/style>/gi, " ")
+      .replace(/<textarea\b[^>]*>[\s\S]*?<\/textarea>/gi, " ")
+      .replace(/<select\b[^>]*>[\s\S]*?<\/select>/gi, " ")
+      .replace(/<input\b[^>]*>/gi, " ")
+      .replace(/<button\b[^>]*>[\s\S]*?<\/button>/gi, " ");
+    const visible = decodeHtmlEntities(withoutControls)
+      .replace(/<[^>]+>/g, " ")
+      .replace(/['’]\s+/g, "'");
+    return normalizeText(visible);
+  }
+
+  function titleMatchCandidates(book) {
+    const candidates = [];
+    if (book.normalizedTitle) {
+      candidates.push(book.normalizedTitle);
+    }
+
+    const withoutTrailingParen = normalizeText(String(book.title || "").replace(/\s*\([^)]*\)\s*$/u, ""));
+    if (
+      withoutTrailingParen &&
+      !candidates.includes(withoutTrailingParen) &&
+      withoutTrailingParen.split(/\s+/).length >= 2
+    ) {
+      candidates.push(withoutTrailingParen);
+    }
+
+    return candidates;
+  }
+
+  function titleMatches(book, pageText) {
+    return titleMatchCandidates(book).some((title) => pageText.includes(title));
+  }
+
+  /** Catalog records use "Last, First"; retailer pages use "First Last". */
+  function authorMatches(normalizedAuthor, pageText) {
+    if (!normalizedAuthor) {
+      return true;
+    }
+    if (pageText.includes(normalizedAuthor)) {
+      return true;
+    }
+
+    const parts = normalizedAuthor.split(/\s+/).filter(Boolean);
+    if (parts.length < 2) {
+      return false;
+    }
+
+    const catalogOrder = `${parts[parts.length - 1]} ${parts.slice(0, -1).join(" ")}`;
+    return pageText.includes(catalogOrder);
+  }
+
+  function pageHasMatch(book, pageHtml) {
+    const pageText = catalogMatchText(pageHtml);
+    const isbn13Match = book.isbn13 && pageText.includes(normalizeText(book.isbn13));
+    const isbn10Match = book.isbn10 && pageText.includes(normalizeText(book.isbn10));
+    return Boolean(isbn13Match || isbn10Match || (titleMatches(book, pageText) && authorMatches(book.normalizedAuthor, pageText)));
   }
 
   function htmlToVisibleText(html) {
@@ -542,17 +629,43 @@
   }
 
   function mergeFormatsByBucket(rows) {
-    const best = new Map();
+    const grouped = new Map();
     for (const row of rows) {
-      const prev = best.get(row.bucket);
-      if (!prev || rowBeatsCandidate(row, prev)) {
-        best.set(row.bucket, row);
-      }
+      const list = grouped.get(row.bucket) || [];
+      list.push(row);
+      grouped.set(row.bucket, list);
     }
-    const primary = BUCKET_ORDER.filter((b) => best.has(b)).map((b) => best.get(b));
-    const extra = [...best.keys()]
-      .filter((b) => !BUCKET_ORDER.includes(b))
-      .map((b) => best.get(b));
+
+    function finish(bucket) {
+      const list = grouped.get(bucket);
+      let best = list[0];
+      for (const row of list.slice(1)) {
+        if (rowBeatsCandidate(row, best)) {
+          best = row;
+        }
+      }
+      if (bucket !== "physical_book" || list.length < 2) {
+        return best;
+      }
+      const notes = [];
+      const seen = new Set();
+      for (const row of list) {
+        const note = row.availabilitySummary || hintForAvailability(row.availability);
+        if (note && !seen.has(note)) {
+          seen.add(note);
+          notes.push(note);
+        }
+      }
+      return {
+        ...best,
+        availabilitySummary: `${list.length} print records. ${notes.join("; ")}`
+      };
+    }
+
+    const primary = BUCKET_ORDER.filter((bucket) => grouped.has(bucket)).map(finish);
+    const extra = [...grouped.keys()]
+      .filter((bucket) => !BUCKET_ORDER.includes(bucket))
+      .map(finish);
     return primary.concat(extra);
   }
 
@@ -696,8 +809,7 @@
     " Open the catalog for per-format copies and holds (live rows load in the browser).";
 
   function analyzeCatalogPage(book, page) {
-    const normalizedPageText = normalizeText(page.text);
-    if (!pageHasMatch(book, normalizedPageText)) {
+    if (!pageHasMatch(book, page.text)) {
       return { matched: false };
     }
 

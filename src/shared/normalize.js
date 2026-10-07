@@ -7,10 +7,11 @@
   }
 
   function normalizeText(value) {
-    return normalizeWhitespace(value)
-      .toLowerCase()
-      .replace(/[^\p{L}\p{N}\s]/gu, "")
-      .trim();
+    return normalizeWhitespace(
+      normalizeWhitespace(value)
+        .toLowerCase()
+        .replace(/[^\p{L}\p{N}\s]/gu, "")
+    );
   }
 
   function normalizeIsbn(value) {

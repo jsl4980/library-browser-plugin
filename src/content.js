@@ -49,7 +49,7 @@
         <a class="library-browser-card__match-action library-browser-card__action library-browser-card__action--exact" href="#" target="_blank" rel="noreferrer noopener"></a>
       </div>
       <div class="library-browser-card__match library-browser-card__match--related" hidden>
-        <p class="library-browser-card__section-label">Related matches</p>
+        <p class="library-browser-card__section-label">Other editions</p>
         <p class="library-browser-card__match-title library-browser-card__title"></p>
         <p class="library-browser-card__match-detail library-browser-card__detail"></p>
         <ul class="library-browser-card__match-formats library-browser-card__formats" hidden></ul>
@@ -167,6 +167,7 @@
     relatedWrap.hidden = false;
 
     const exactLabel = exactWrap.querySelector(".library-browser-card__section-label");
+    const relatedLabel = relatedWrap.querySelector(".library-browser-card__section-label");
     if (result.exactMatch) {
       exactLabel.hidden = false;
       fillMatchSection(exactWrap, result.exactMatch, "exact");
@@ -175,6 +176,9 @@
       exactWrap.hidden = true;
     }
 
+    if (relatedLabel) {
+      relatedLabel.hidden = !result.exactMatch || !result.relatedMatch;
+    }
     fillMatchSection(relatedWrap, result.relatedMatch, "related");
   }
 

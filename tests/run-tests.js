@@ -78,6 +78,14 @@ async function main() {
         }
       }
 
+      if (testCase.id === "TC-US3-SERIES-PAREN-TITLE") {
+        assert.ok(
+          requests.some((url) => url.includes("keyword=Carl%27s%20Doomsday%20Scenario%20Matt%20Dinniman")),
+          "series subtitle should not narrow the keyword search"
+        );
+        assert.ok(requests.every((url) => !/Dungeon/i.test(url)));
+      }
+
       if (testCase.includeDebug) {
         assert.ok(result.debug, `${testCase.id} should attach debug metadata`);
         assert.equal(result.debug.source.title, fixture.book.title);
@@ -90,6 +98,70 @@ async function main() {
       }
     });
   }
+
+  await run("paperback ISBN search keeps the other print edition in the related section", async () => {
+    const paperbackHtml = `
+      <div class="content-module content-module--search-result">
+        <img class="c-title-detail-formats__img" alt="Book" title="Book" />
+        <span>Carl&#39;s</span> <span>Doomsday</span> <span>Scenario</span>
+        by <span>Dinniman</span>, <span>Matt</span>
+        <div>ISBN: 9780593820278</div>
+        <div>Local Availability: 0 (of 2)</div>
+        <div>System Availability: 2</div>
+      </div>`;
+    const keywordHtml = `
+      <div class="content-module content-module--search-result">
+        <img class="c-title-detail-formats__img" alt="Book" title="Book" />
+        <span>Carl&#39;s</span> <span>Doomsday</span> <span>Scenario</span>
+        by <span>Dinniman</span>, <span>Matt</span>
+        <div>ISBN: 9780593820261</div>
+        <div>Local Availability: 0 (of 17)</div>
+        <div>System Availability: 17</div>
+      </div>
+      <div class="content-module content-module--search-result">
+        <img class="c-title-detail-formats__img" alt="Ebook" title="Ebook" />
+        <span>Carl&#39;s</span> <span>Doomsday</span> <span>Scenario</span>
+        by <span>Dinniman</span>, <span>Matt</span>
+      </div>
+      ${paperbackHtml}`;
+    const harness = createConnectorHarness({
+      fetchImpl: async (url) => ({
+        ok: true,
+        status: 200,
+        url: String(url),
+        async text() {
+          return String(url).includes("isbn=") ? paperbackHtml : keywordHtml;
+        }
+      })
+    });
+    const book = harness.toBookMetadata({
+      title: "Carl's Doomsday Scenario (Dungeon Crawler Carl)",
+      author: "Matt Dinniman",
+      isbn13: "9780593820278",
+      isbn10: "0593820274",
+      sourceSite: "amazon",
+      sourceUrl: "https://www.amazon.com/dp/0593820274"
+    });
+    const result = await harness.connector.lookup(
+      book,
+      {
+        libraryName: "Onondaga County Public Library System",
+        catalogBaseUrl: "https://catalog.onlib.org/polaris/"
+      },
+      { includeDebug: true }
+    );
+
+    assert.equal(result.exactMatch.formats.length, 1);
+    assert.equal(result.exactMatch.formats[0].bucket, "physical_book");
+    assert.match(result.debug.catalog.lookupUrlsOrdered[1], /Carl%27s%20Doomsday%20Scenario%20Matt%20Dinniman/);
+    assert.ok(result.relatedMatch);
+    const print = result.relatedMatch.formats.find((row) => row.bucket === "physical_book");
+    const ebook = result.relatedMatch.formats.find((row) => row.bucket === "ebook");
+    assert.match(print.hint, /2 print records/);
+    assert.match(print.hint, /of 17/);
+    assert.match(print.hint, /of 2/);
+    assert.ok(ebook);
+  });
 
   await run("traceability registry covers all page integration tests", async () => {
     for (const testCase of pageCases.values()) {

@@ -52,6 +52,57 @@
       "expectedStatus": "found"
     },
     {
+      "id": "ocpl-kindle-apostrophe",
+      "captureDate": "2026-10-06",
+      "originatingUrlPattern": "https://catalog.onlib.org/polaris/view.aspx?keyword=*",
+      "stories": ["US3", "US5", "US7"],
+      "book": {
+        "title": "Carl's Doomsday Scenario",
+        "author": "Matt Dinniman",
+        "isbn13": "",
+        "isbn10": "",
+        "sourceSite": "amazon",
+        "sourceUrl": "https://www.amazon.com/Carls-Doomsday-Scenario-Dungeon-Crawler-ebook/dp/B08PBCD9Y7/"
+      },
+      "responseFile": "ocpl-kindle-apostrophe.html",
+      "responseStatus": 200,
+      "expectedStatus": "available_now"
+    },
+    {
+      "id": "ocpl-series-paren-title",
+      "captureDate": "2026-10-06",
+      "originatingUrlPattern": "https://catalog.onlib.org/polaris/view.aspx?keyword=*",
+      "stories": ["US3", "US5", "US7"],
+      "book": {
+        "title": "Carl's Doomsday Scenario (Dungeon Crawler Carl)",
+        "author": "Matt Dinniman",
+        "isbn13": "",
+        "isbn10": "",
+        "sourceSite": "amazon",
+        "sourceUrl": "https://www.amazon.com/Carls-Doomsday-Scenario-Dungeon-Crawler/dp/0593820274/"
+      },
+      "responseFile": "ocpl-kindle-apostrophe.html",
+      "responseStatus": 200,
+      "expectedStatus": "available_now"
+    },
+    {
+      "id": "ocpl-query-echo-only",
+      "captureDate": "2026-10-06",
+      "originatingUrlPattern": "https://catalog.onlib.org/polaris/view.aspx?keyword=*",
+      "stories": ["US5", "US6"],
+      "book": {
+        "title": "Carl's Doomsday Scenario",
+        "author": "Matt Dinniman",
+        "isbn13": "",
+        "isbn10": "",
+        "sourceSite": "amazon",
+        "sourceUrl": "https://www.amazon.com/Carls-Doomsday-Scenario-Dungeon-Crawler-ebook/dp/B08PBCD9Y7/"
+      },
+      "responseFile": "ocpl-query-echo-only.html",
+      "responseStatus": 200,
+      "expectedStatus": "not_found"
+    },
+    {
       "id": "ocpl-not-found",
       "captureDate": "2026-04-11",
       "originatingUrlPattern": "https://catalog.onlib.org/polaris/view.aspx?keyword=*",
